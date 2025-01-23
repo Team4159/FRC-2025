@@ -24,7 +24,6 @@ import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoSwerve;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -46,7 +45,6 @@ public class RobotContainer {
     private final CommandJoystick driveStick = new CommandJoystick(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Vision vision = new Vision(drivetrain);
 
     /* Path follower */
     private final AutoFactory autoFactory;
