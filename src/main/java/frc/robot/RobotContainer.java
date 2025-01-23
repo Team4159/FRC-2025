@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.subsystems.Elevator;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoSwerve;
 import frc.robot.generated.TunerConstants;
@@ -45,6 +46,7 @@ public class RobotContainer {
     private final CommandJoystick driveStick = new CommandJoystick(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final Elevator elevator = new Elevator();
 
     /* Path follower */
     private final AutoFactory autoFactory;
@@ -129,6 +131,7 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         /* Run the routine selected from the auto chooser */
-        return autoChooser.selectedCommand();
+        //return autoChooser.selectedCommand();
+        return new InstantCommand(() -> elevator.setGoalPosition(1));
     }
 }
