@@ -203,7 +203,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void zero(){
-        resetPose(new Pose2d(getState().Pose.getTranslation(), new Rotation2d()));
+        Rotation2d offset = new Rotation2d();
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)) offset = new Rotation2d(Math.PI);
+        resetPose(new Pose2d(getState().Pose.getTranslation(), offset));
     }
 
     /**
@@ -326,8 +328,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-        testField.setRobotPose(getClosestReef(true));
-        SmartDashboard.putData("closest reef", testField);
+        // testField.setRobotPose(getClosestReef(true));
+        // SmartDashboard.putData("closest reef", testField);
+
+        testField.setRobotPose(getState().Pose);
+        SmartDashboard.putData("Pose", testField);
     }
 
     private void startSimThread() {

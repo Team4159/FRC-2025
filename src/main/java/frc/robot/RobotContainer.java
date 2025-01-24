@@ -46,7 +46,7 @@ public class RobotContainer {
     private final CommandJoystick driveStick = new CommandJoystick(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    //public final Vision vision = new Vision(drivetrain);
+    public final Vision vision = new Vision(drivetrain);
 
     /* Path follower */
     private final AutoFactory autoFactory;
@@ -102,6 +102,7 @@ public class RobotContainer {
 
         driveStick.button(5).whileTrue(new AutoAlign(drivetrain));
         driveStick.button(6).whileTrue(new AutoAlign(drivetrain, true));
+        driveStick.button(3).onTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
         //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
         driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));

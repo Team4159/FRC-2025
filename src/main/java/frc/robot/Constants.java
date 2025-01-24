@@ -16,8 +16,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 public class Constants {
     public static final class Swerve{
         //bumpers included
-        public static final double width = 34;
+        public static final double width = 30;
         public static final double L4Offset = 3.5;
+        public static final double autoSwerveToleranceXY = 1;
+        public static final double autoSwerveToleranceTheta = Math.PI/128;
     }
 
     public static final class Elevator{
