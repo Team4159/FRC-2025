@@ -16,10 +16,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoSwerve;
 import frc.robot.generated.TunerConstants;
@@ -44,7 +46,11 @@ public class RobotContainer {
 
     private final CommandJoystick driveStick = new CommandJoystick(0);
 
+    private final CommandJoystick secondaryStick = new CommandJoystick(1);
+
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    public final AlgaeIntake algaeIntake = new AlgaeIntake();
 
     /* Path follower */
     private final AutoFactory autoFactory;
@@ -125,6 +131,10 @@ public class RobotContainer {
         joystick.L2().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        secondaryStick.button(1).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE));
+        secondaryStick.button(2).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE));
+
     }
 
     public Command getAutonomousCommand() {

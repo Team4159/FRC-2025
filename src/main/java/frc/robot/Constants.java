@@ -40,6 +40,23 @@ public class Constants {
         public static final PIDController elevatorPID = new PIDController(kP, kI, kD);
     }
 
+    public static final class AlgaeIntake {
+        public static final int rollerID = 0, pivotID = 1;
+
+        public static enum AlgaeIntakeState {
+            STOW(0, 0),
+            INTAKE(Units.degreesToRadians(45), 0.5),
+            OUTTAKE(Units.degreesToRadians(15), -0.5);
+
+            public final double speed;
+            public final double angle;
+            private AlgaeIntakeState(double s, double a) {
+                speed = s;
+                angle = a;
+            }
+        }
+    }
+
     public static final class Field{
         //values are in inches
         public static final double poleDist = 1.652;
