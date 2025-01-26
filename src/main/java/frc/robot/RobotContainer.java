@@ -44,6 +44,7 @@ public class RobotContainer {
     private final CommandPS4Controller joystick = new CommandPS4Controller(2);
 
     private final CommandJoystick driveStick = new CommandJoystick(0);
+    private final CommandJoystick secondaryStick = new CommandJoystick(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
@@ -127,11 +128,16 @@ public class RobotContainer {
         joystick.L2().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        //TODO combine these commands with commands for coral manipulator
+        secondaryStick.button(5).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L1));
+        secondaryStick.button(6).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L2));
+        secondaryStick.button(7).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L3));
+        secondaryStick.button(8).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L4));
     }
 
     public Command getAutonomousCommand() {
         /* Run the routine selected from the auto chooser */
-        //return autoChooser.selectedCommand();
-        return new InstantCommand(() -> elevator.setGoalPosition(1));
+        return autoChooser.selectedCommand();
     }
 }
