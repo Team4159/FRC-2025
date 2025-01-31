@@ -16,15 +16,18 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.ElevatorArmSimulation;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoSwerve;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralManipulatorPivot;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -47,7 +50,10 @@ public class RobotContainer {
     private final CommandJoystick secondaryStick = new CommandJoystick(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Elevator elevator = new Elevator();
+    private final Elevator elevator = new Elevator();
+    private final CoralManipulatorPivot coralManipulatorPivot = new CoralManipulatorPivot();
+
+    private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, coralManipulatorPivot);
 
     /* Path follower */
     private final AutoFactory autoFactory;
@@ -129,11 +135,32 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        //TODO combine these commands with commands for coral manipulator
-        secondaryStick.button(5).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L1));
-        secondaryStick.button(6).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L2));
-        secondaryStick.button(7).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L3));
-        secondaryStick.button(8).onTrue(elevator.new ChangeState(Constants.Elevator.ElevatorState.L4));
+        secondaryStick.button(2).onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.INTAKE),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE)));
+        secondaryStick.button(5).onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.L2),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.L2AND3)));
+        secondaryStick.button(6).onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.L3),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.L2AND3)));
+        secondaryStick.button(7).onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.L4),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.L4SETUP)));
+
+        //PS4 controller
+        joystick.cross().onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.INTAKE),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE)));
+        joystick.square().onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.L2),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.L2AND3)));
+        joystick.circle().onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.L3),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.L2AND3)));
+        joystick.triangle().onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(Constants.Elevator.ElevatorState.L4),
+            coralManipulatorPivot.new ChangeState(Constants.CoralManipulator.CoralManipulatorPivotState.L4SETUP)));
     }
 
     public Command getAutonomousCommand() {

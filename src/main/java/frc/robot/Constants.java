@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.List;
 import java.util.Map;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,39 +25,96 @@ public class Constants {
         public static final int elevatorMotorID = 1;
         public static final int limitSwitchPort = 0;
 
-        public static final double maxVelocity = 0;
-        public static final double maxAcceleration = 0;
-        public static final TrapezoidProfile.Constraints trapezoidProfileConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
-        public static final TrapezoidProfile trapezoidProfile = new TrapezoidProfile(trapezoidProfileConstraints);
-
         //TODO ask Austin about mech
-        public static final double rotationsPerMeter = 30;
+        public static final double elevatorGearing = 20;
+        public static final double elevatorWeightKG = Units.lbsToKilograms(40);
+        public static final double spoolDiameter = Units.inchesToMeters(1.273);
+        public static final double maxHeight = Units.inchesToMeters(21);
+        public static final double rotationsPerMeter = elevatorGearing / spoolDiameter;
 
         public static final double elevatorTolerance = 0.02;
 
         public static final double kS = 0;
-        public static final double kV = 1;
-        public static final double kA = 0;
-        public static final ElevatorFeedforward elevatorFF = new ElevatorFeedforward(kS, kV, kA);
+        public static final double kG = 0.29/12;
+        public static final double kV = 20/12;
+        public static final double kA = 0.08/12;
+        
+        public static final ElevatorFeedforward elevatorFF = new ElevatorFeedforward(kS, kG, kV, kA);
 
-        public static final double kP = 1;
-        public static final double kI = 0;
+        public static final double kP = 2;
+        public static final double kI = 0.5;
         public static final double kD = 0;
+        public static final double maxVelocity = 0.75;
+        public static final double maxAcceleration = 1.75;
+
+        public static final TrapezoidProfile.Constraints trapezoidProfileConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
         public static final TrapezoidProfile.Constraints PIDConstraints = new Constraints(maxVelocity, maxAcceleration);
         public static final ProfiledPIDController elevatorPID = new ProfiledPIDController(kP, kI, kD, PIDConstraints);
 
         //TODO: find setpoints for elevator
         public static enum ElevatorState{
             STOW(Units.inchesToMeters(0)),
-            INTAKE(Units.inchesToMeters(3)),
+            INTAKE(Units.inchesToMeters(1)),
             L1(Units.inchesToMeters(6)),
-            L2(Units.inchesToMeters(15)),
-            L3(Units.inchesToMeters(20)),
-            L4(Units.inchesToMeters(30));
+            L2(Units.inchesToMeters(13)),
+            L3(Units.inchesToMeters(18)),
+            L4(Units.inchesToMeters(21));
 
             public double height;
             private ElevatorState(double height){
                 this.height = height;
+            }
+        }
+    }
+
+    public static final class CoralManipulator{
+        public static final int angleMotorID = 2;
+        public static final int rollerMotorID = 3;
+        public static final int beamBreakDIO = 0;
+
+        public static final double gearRatio = 5;
+        public static final double MOI = 0.1007651;
+        public static final double lengthMeters = 0.405;
+
+
+        public static final double kS = 0;
+        public static final double kG = 2.45/12;
+        public static final double kV = 0.08/12;
+        public static final double kA = 0.15/12;
+
+        public static final ArmFeedforward angleFF = new ArmFeedforward(kS, kG, kV, kA);
+
+        public static final double kP = 0.7;
+        public static final double kI = 0.003;
+        public static final double kD = 0.01;
+        public static final double maxVelocity = 5;
+        public static final double maxAcceleration = 3;
+
+        public static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
+        public static final ProfiledPIDController anglePID = new ProfiledPIDController(kP, kI, kD, constraints);
+
+        public static enum CoralManipulatorPivotState{
+            STOW(0),
+            INTAKE(Units.degreesToRadians(45)),
+            TROUGH(Units.degreesToRadians(225)),
+            L2AND3(Units.degreesToRadians(235)),
+            L4SETUP(Units.degreesToRadians(250)),
+            L4FINAL(Units.degreesToRadians(220));
+
+            public double angle;
+            private CoralManipulatorPivotState(double angle){
+                this.angle = angle;
+            }
+        }
+
+        public static enum CoralManipulatorRollerState{
+            OFF(0),
+            INTAKE(0.3),
+            OUTTAKE(-0.3);
+
+            public double angle;
+            private CoralManipulatorRollerState(double angle){
+                this.angle = angle;
             }
         }
     }
