@@ -41,16 +41,24 @@ public class Constants {
     }
 
     public static final class AlgaeIntake {
-        public static final int rollerID = 0, pivotID = 1;
+        public static final int rollerID = 3, pivotID = 2;
+
+        public static final double kP = 0.3;
+        public static final double kI = 0;
+        public static final double kD = 0;
+
+        public static final PIDController pidController = new PIDController(kP, kI, kD){{
+            enableContinuousInput(0, 2*Math.PI);
+        }};
 
         public static enum AlgaeIntakeState {
-            STOW(0, 0),
-            INTAKE(Units.degreesToRadians(45), 0.5),
-            OUTTAKE(Units.degreesToRadians(15), -0.5);
+            STOW(1.85, 0),
+            INTAKE(0.7, 1),
+            OUTTAKE(0.7, -1);
 
             public final double speed;
             public final double angle;
-            private AlgaeIntakeState(double s, double a) {
+            private AlgaeIntakeState(double a, double s) {
                 speed = s;
                 angle = a;
             }

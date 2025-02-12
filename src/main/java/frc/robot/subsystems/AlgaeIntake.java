@@ -12,10 +12,12 @@ import frc.robot.Constants;
 public class AlgaeIntake extends SubsystemBase {
     private SparkMax roller;
     private SparkMax pivot;
+    private double targetAngle;
 
     public AlgaeIntake() {
         roller = new SparkMax(Constants.AlgaeIntake.rollerID, MotorType.kBrushless);
         pivot = new SparkMax(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
+        targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle;
     }
 
     public void setRollerSpeed(double speed) {
@@ -27,15 +29,30 @@ public class AlgaeIntake extends SubsystemBase {
     }
     /**@param angle radians*/
     public void setIntakeAngle(double angle) {
-        pivot.getClosedLoopController().setReference(Units.radiansToRotations(angle), ControlType.kPosition);
+        targetAngle = angle;
+        Constants.AlgaeIntake.pidController.reset();
+    }
+
+    @Override
+    public void periodic(){
+        double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
+        System.out.println(targetAngle + " " + currentAngle);
+        pivot.set(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
     }
 
     public class ChangeState extends Command {
         private final Constants.AlgaeIntake.AlgaeIntakeState desiredState;
 
-        public ChangeState(Constants.AlgaeIntake.AlgaeIntakeState desiredState) {
+        private final boolean stow;
+
+        public ChangeState(Constants.AlgaeIntake.AlgaeIntakeState desiredState, boolean stow) {
             this.desiredState = desiredState;
+            this.stow = stow;
             addRequirements(AlgaeIntake.this);
+        }
+
+        public ChangeState(Constants.AlgaeIntake.AlgaeIntakeState desiredState) {
+            this(desiredState, false); 
         }
 
         @Override
@@ -47,7 +64,7 @@ public class AlgaeIntake extends SubsystemBase {
         @Override
         public void end(boolean interrupted) {
             stopRoller();
-            setIntakeAngle(Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle);
+            if (stow) setIntakeAngle(Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle);
         }
     }
 }

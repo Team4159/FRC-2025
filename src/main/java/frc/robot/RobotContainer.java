@@ -133,7 +133,7 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         secondaryStick.button(1).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE));
-        secondaryStick.button(2).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE));
+        secondaryStick.button(2).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true));
 
     }
 
