@@ -19,7 +19,30 @@ public class Constants {
         public static final double width = 34;
         public static final double L4Offset = 3.5;
     }
+    public static final class Deepclimb{
+        public enum deepClimbStates {
+            OFF(0),
+            FORWARD(1),
+            BACKWARD(-1);
 
+            public final double speed;        
+             
+            // take enum paremter that is deep climb states, set motor speed to state.speed
+            deepClimbStates(double speed){
+                this.speed = speed;
+            }
+
+            public double getSpeed_deepClimb(){
+                return speed;
+            }
+        }
+        
+        
+        public static final double forwardSoftLimit = 10;
+        public static final int deviceID = 0;
+        public static final double reverseSoftLimit = 0;
+    }
+    
     public static final class Elevator{
         public static final int elevatorMotorID = 1;
         public static final int limitSwitchPort = 0;
