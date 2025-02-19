@@ -24,6 +24,7 @@ import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoSwerve;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Deepclimb;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -43,6 +44,9 @@ public class RobotContainer {
     private final CommandPS4Controller joystick = new CommandPS4Controller(2);
 
     private final CommandJoystick driveStick = new CommandJoystick(0);
+
+    private final CommandJoystick secondaryStick = new CommandJoystick(1);// 1 = usb
+    public final Deepclimb deepclimb = new Deepclimb(); 
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -125,6 +129,13 @@ public class RobotContainer {
         joystick.L2().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+
+        secondaryStick.button(0).whileTrue(deepclimb.new changeState(Constants.Deepclimb.deepClimbStates.FORWARD));
+        secondaryStick.button(1).whileTrue(deepclimb.new changeState(Constants.Deepclimb.deepClimbStates.BACKWARD));
+        
+
+
     }
 
     public Command getAutonomousCommand() {

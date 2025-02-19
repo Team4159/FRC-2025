@@ -6,8 +6,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SoftLimitConfig;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.Deepclimb.deepClimbStates;
 
 public class Deepclimb extends SubsystemBase{
   SparkFlex motor;
@@ -25,11 +27,29 @@ public class Deepclimb extends SubsystemBase{
   public void liftArm(double angle){
     motor.getClosedLoopController().setReference(angle, ControlType.kPosition);
   }
+
+  public void pivot(double speed){
+    
+  }
   public void setSoftLimits(){
     softLimit.forwardSoftLimitEnabled(true);
     softLimit.reverseSoftLimitEnabled(true);
     softLimit.forwardSoftLimit(Constants.Deepclimb.forwardSoftLimit);
     softLimit.reverseSoftLimit(Constants.Deepclimb.reverseSoftLimit);
     
+  }
+
+  public class changeState extends Command {
+    private final Constants.Deepclimb.deepClimbStates selectedState;
+    public changeState(Constants.Deepclimb.deepClimbStates state){
+      selectedState = state;
+      addRequirements(Deepclimb.this); // use subsystem self as part of command
+    }
+  
+
+    @Override
+    public void initialize(){
+      spin(selectedState.speed);
+    }
   }
 }

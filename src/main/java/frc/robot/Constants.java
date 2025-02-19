@@ -19,18 +19,22 @@ public class Constants {
         public static final double width = 34;
         public static final double L4Offset = 3.5;
     }
-    public static final class Deepclimb{
-        public enum deepClimbStates {
-            OFF(0),
+
+    public static final class Deepclimb {
+        public static enum deepClimbStates {
             FORWARD(1),
             BACKWARD(-1);
 
             public final double speed;        
              
             // take enum paremter that is deep climb states, set motor speed to state.speed
-            deepClimbStates(double speed){
-                this.speed = speed;
+            private deepClimbStates(double s){
+                speed = s;
             }
+
+            // public double getSpeed_deepClimb(){
+            //     return speed;
+            // }
         }
         
         
