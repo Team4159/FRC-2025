@@ -13,13 +13,12 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -62,7 +61,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
-    Field2d testField = new Field2d();
+    private final Field2d closestPoseF2d = new Field2d();
+    private Pose2d closestAutoAlignPose = new Pose2d();
+    private Pose2d secondClosestAutoAlignPose = new Pose2d();
+    private Pose2d closestStationAutoAlignPose = new Pose2d();
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -203,7 +205,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void zero(){
-        resetPose(new Pose2d(getState().Pose.getTranslation(), new Rotation2d()));
+        resetPose(new Pose2d(getState().Pose.getTranslation(), new Rotation2d(Math.PI)));
     }
 
     /**
@@ -271,18 +273,53 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
-    public Pose2d getClosestReef(){
-        return getClosestReef(false);
+    public void stopSwerve(){
+        setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
     }
 
-    public Pose2d getClosestReef(boolean L4){
-        var pose = getState().Pose.nearest(Constants.Field.reef.get(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)));
-        if(L4){
-            var angle = pose.getRotation().getRadians() - Math.PI;
-            var poseAngle = new Rotation2d(pose.getRotation().getRadians());
-            return new Pose2d(pose.getX() + Units.inchesToMeters(Constants.Swerve.L4Offset) * Math.cos(angle), pose.getY() + Units.inchesToMeters(Constants.Swerve.L4Offset) * Math.sin(angle), pose.getRotation());
+    public void calculateClosestReef(){
+        Translation2d reefTranslation;
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue))
+            reefTranslation = new Translation2d(Constants.Field.fieldLength/2 - Constants.Field.reefDistFromCenter, Constants.Field.fieldWidth/2);
+        else
+            reefTranslation = new Translation2d(Constants.Field.fieldLength/2 + Constants.Field.reefDistFromCenter, Constants.Field.fieldWidth/2);
+        Pose2d processor = Constants.Field.processors.get(DriverStation.getAlliance().orElse(Alliance.Blue));
+        if(getState().Pose.getTranslation().getDistance(reefTranslation) < Constants.Swerve.maxReefAutoAlignDistatnce){
+            var reefPoses = Constants.Field.reef.get(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+            var closestSide = getState().Pose.nearest(reefPoses);
+            var angle = closestSide.getRotation().getRadians() - Math.PI/2;
+            //closestAutoAlignPose = new Pose2d(closestSide.getX() + Units.inchesToMeters(Constants.Field.middletoPole) * Math.cos(angle), closestSide.getY() + Units.inchesToMeters(Constants.Field.middletoPole) * Math.sin(angle), closestSide.getRotation());
+            //secondClosestAutoAlignPose = new Pose2d(closestSide.getX() - Units.inchesToMeters(Constants.Field.middletoPole) * Math.cos(angle), closestSide.getY() - Units.inchesToMeters(Constants.Field.middletoPole) * Math.sin(angle), closestSide.getRotation());
+            var p1 = new Pose2d(closestSide.getX() + Constants.Field.middletoPole * Math.cos(angle), closestSide.getY() + Constants.Field.middletoPole * Math.sin(angle), closestSide.getRotation());
+            var p2 = new Pose2d(closestSide.getX() - Constants.Field.middletoPole * Math.cos(angle), closestSide.getY() - Constants.Field.middletoPole * Math.sin(angle), closestSide.getRotation());
+            if(p1.getTranslation().getDistance(getState().Pose.getTranslation()) < p2.getTranslation().getDistance(getState().Pose.getTranslation())){
+                closestAutoAlignPose = p1;
+                secondClosestAutoAlignPose = p2;
+            }
+            else{
+                closestAutoAlignPose = p2;
+                secondClosestAutoAlignPose = p1;
+            }
         }
-        return pose;
+        else if(getState().Pose.getTranslation().getDistance(processor.getTranslation()) < Constants.Swerve.maxReefAutoAlignDistatnce){
+            closestAutoAlignPose = processor;
+        }
+        else{
+            var reefPoses = Constants.Field.stations.get(DriverStation.getAlliance().orElse(Alliance.Blue));
+            closestAutoAlignPose = getState().Pose.nearest(reefPoses);
+        }
+    }
+
+    public Pose2d getDesieredAutoAlignPose(boolean L4, boolean useSecondClosestPose){
+        if(L4){
+            var angle = closestAutoAlignPose.getRotation().getRadians() - Math.PI;
+            closestAutoAlignPose = new Pose2d(closestAutoAlignPose.getX() + Constants.Swerve.L4Offset * Math.cos(angle), closestAutoAlignPose.getY() + Constants.Swerve.L4Offset * Math.sin(angle), closestAutoAlignPose.getRotation());
+            secondClosestAutoAlignPose = new Pose2d(secondClosestAutoAlignPose.getX() + Constants.Swerve.L4Offset * Math.cos(angle), secondClosestAutoAlignPose.getY() + Constants.Swerve.L4Offset * Math.sin(angle), secondClosestAutoAlignPose.getRotation());
+        }
+        if(useSecondClosestPose){
+            return secondClosestAutoAlignPose;
+        }
+        return closestAutoAlignPose;
     }
 
     /**
@@ -326,8 +363,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-        testField.setRobotPose(getClosestReef(true));
-        SmartDashboard.putData("closest reef", testField);
+        calculateClosestReef();
+        closestPoseF2d.getObject("closestPose").setPose(closestAutoAlignPose);
+        closestPoseF2d.setRobotPose(getState().Pose);
+        SmartDashboard.putData("closest reef", closestPoseF2d);
     }
 
     private void startSimThread() {
