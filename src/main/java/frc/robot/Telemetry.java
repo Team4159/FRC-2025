@@ -114,8 +114,8 @@ public class Telemetry {
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");
         fieldPub.set(m_poseArray);
-        //field2d.setRobotPose(state.Pose);
-        //SmartDashboard.putData("Pose", field2d);
+        field2d.setRobotPose(state.Pose);
+        SmartDashboard.putData("Pose", field2d);
 
         /* Telemeterize the module states to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {
