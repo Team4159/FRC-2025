@@ -36,6 +36,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralManipulatorPivot;
 //import frc.robot.subsystems.CoralManipulatorPivot;
 import frc.robot.subsystems.CoralManipulatorRoller;
+import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -72,6 +73,7 @@ public class RobotContainer {
 
     //subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final Vision vision = new Vision(drivetrain);
 
     public final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
@@ -136,6 +138,8 @@ public class RobotContainer {
 
         driveStick.button(5).whileTrue(new AutoAlign(drivetrain));
         driveStick.button(6).whileTrue(new AutoAlign(drivetrain, false, true));
+        //driveStick.button(6).whileTrue(new AutoAlign(drivetrain, true));
+        driveStick.button(3).onTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
         //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
         driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));

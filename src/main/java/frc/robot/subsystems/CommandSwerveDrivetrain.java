@@ -207,11 +207,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void zero(){
         resetPose(new Pose2d(getState().Pose.getTranslation(), new Rotation2d(Math.PI)));
     }
-
-    public void forceVision(){
-        if()
-    }
-
+    
     /**
      * Creates a new auto factory for this drivetrain.
      *
