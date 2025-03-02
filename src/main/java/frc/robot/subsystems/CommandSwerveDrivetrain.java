@@ -13,15 +13,22 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.TimeUnit;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -30,9 +37,14 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.AdjustableSlewRateLimiter;
 import frc.robot.Constants;
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.CommandSwerveDrivetrain.Drive;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -42,6 +54,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    private double maxAccel;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -52,9 +65,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /** Swerve request to apply during field-centric path following */
     private final SwerveRequest.ApplyFieldSpeeds m_pathApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
-    private final PIDController m_pathXController = new PIDController(10, 0, 0);
-    private final PIDController m_pathYController = new PIDController(10, 0, 0);
-    private final PIDController m_pathThetaController = new PIDController(7, 0, 0);
+    //private final SwerveRequest.ApplyFieldSpeeds m_driveApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+    private final PIDController m_pathXController = new PIDController(3, 0, 0);
+    private final PIDController m_pathYController = new PIDController(3, 0, 0);
+    private final PIDController m_pathThetaController = new PIDController(5, 0, 0);
+
+    private final PIDController m_vxController = new PIDController(1, 0, 0);
+    private final PIDController m_vyController = new PIDController(1, 0, 0);
+    private final PIDController m_omegaController = new PIDController(5, 0, 0){{
+        enableContinuousInput(-Math.PI, Math.PI);
+    }};
+
+    //private double desiredYaw;
+
+    private final SwerveRequest.ApplyFieldSpeeds m_driveApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+    private final SwerveRequest.ApplyRobotSpeeds m_driveApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -66,12 +91,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Pose2d secondClosestAutoAlignPose = new Pose2d();
     private Pose2d closestStationAutoAlignPose = new Pose2d();
 
+    private AdjustableSlewRateLimiter limiterX = new AdjustableSlewRateLimiter(1, -1, 0);
+    private AdjustableSlewRateLimiter limiterY = new AdjustableSlewRateLimiter(1, -1, 0);
+
+    private Elevator elevator;
+
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
         new SysIdRoutine.Config(
-            null,        // Use default ramp rate (1 V/s)
+            Volts.of(1.5).per(Second),        // Use default ramp rate (1 V/s)
             Volts.of(4), // Reduce dynamic step voltage to 4 V to prevent brownout
-            null,        // Use default timeout (10 s)
+            Seconds.of(5),        // Use default timeout (10 s)
             // Log state with SignalLogger class
             state -> SignalLogger.writeString("SysIdTranslation_State", state.toString())
         ),
@@ -146,6 +176,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        zero();
     }
 
     /**
@@ -170,6 +201,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        zero();
     }
 
     /**
@@ -202,10 +234,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        zero();
     }
 
     public void zero(){
-        resetPose(new Pose2d(getState().Pose.getTranslation(), new Rotation2d(Math.PI)));
+        Rotation2d offset = new Rotation2d();
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)) offset = new Rotation2d(Math.PI);
+        resetPose(new Pose2d(getState().Pose.getTranslation(), offset));
+        //desiredYaw = offset.getRadians();
     }
 
     /**
@@ -245,6 +281,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
+    public void setElevator(Elevator elevator){
+        this.elevator = elevator;
+    }
+
     /**
      * Follows the given field-centric path sample with PID.
      *
@@ -273,8 +313,37 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
+    /** uses robot relative control */
+    public void ManualAlign(double inputX, double inputY){
+        double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
+        double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
+        // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
+        //     speedX *= -1;
+        //     speedY *= -1;
+        // }
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, 0);
+        setControl(m_driveApplyRobotSpeeds.withSpeeds(desiredSpeeds));
+    }
+
+    /** uses field relative control */
+    public void drive(double inputX, double inputY, double inputOmega){
+        //System.out.println(maxAccel);
+        //desiredYaw += inputOmega*0.02;
+        //desiredYaw = MathUtil.angleModulus(desiredYaw);
+        double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
+        double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
+        //double speedT = m_omegaController.calculate(getState().Pose.getRotation().getRadians(), desiredYaw);
+        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
+            speedX *= -1;
+            speedY *= -1;
+        }
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega);
+        setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
+    }
+
     public void stopSwerve(){
-        setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
+        //setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
+        System.out.println("stopping");
     }
 
     public void calculateClosestReef(){
@@ -367,6 +436,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         closestPoseF2d.getObject("closestPose").setPose(closestAutoAlignPose);
         closestPoseF2d.setRobotPose(getState().Pose);
         SmartDashboard.putData("closest reef", closestPoseF2d);
+        setMaxAccel();
+    }
+
+    private void setMaxAccel(){
+        if(elevator != null){
+            maxAccel = MathUtil.interpolate(Constants.Swerve.maxAccelFullRetraction, Constants.Swerve.maxAccelFullExtension, elevator.getHeight() / Constants.Elevator.maxHeight);
+            limiterX.setRateLimits(maxAccel, -maxAccel);
+            limiterY.setRateLimits(maxAccel, -maxAccel);
+        }
     }
 
     private void startSimThread() {
@@ -382,5 +460,42 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    public class Drive extends Command{
+        CommandPS4Controller ps4Controller;
+        CommandJoystick joystick;
+        public Drive(CommandPS4Controller ps4Controller){
+            this.ps4Controller = ps4Controller;
+            addRequirements(CommandSwerveDrivetrain.this);
+        }
+        public Drive(CommandJoystick joystick){
+            this.joystick = joystick;
+            addRequirements(CommandSwerveDrivetrain.this);
+        }
+
+        public void execute(){
+            if(ps4Controller != null){
+                drive(MathUtil.applyDeadband(-ps4Controller.getLeftY(), 0.1), MathUtil.applyDeadband(-ps4Controller.getLeftX(), 0.1), MathUtil.applyDeadband(-ps4Controller.getRightX(), 0.1));
+            }
+            else{
+                drive(-joystick.getY(), -joystick.getX(), -joystick.getZ());
+            }
+        }
+    }
+
+    public class ManualAlign extends Command{
+        double inputX, inputY;
+        CommandJoystick joystick;
+        public ManualAlign(CommandJoystick joystick, double inputX, double inputY){
+            this.joystick = joystick;
+            this.inputX = inputX;
+            this.inputY = inputY;
+            addRequirements(CommandSwerveDrivetrain.this);
+        }
+
+        public void execute(){
+            ManualAlign(inputX, inputY);
+        }
     }
 }

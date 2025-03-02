@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.Utils;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,9 +18,14 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   private final boolean kUseLimelight = false;
+  // UsbCamera camera = CameraServer.startAutomaticCapture();
+  // CvSink cvSink = CameraServer.getVideo();
+  // CvSource outputStream = CameraServer.putVideo("USB Camera 0", 640, 480);
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    //camera.setResolution(640, 480);
+    CameraServer.startAutomaticCapture();
   }
 
   @Override
@@ -45,6 +51,16 @@ public class Robot extends TimedRobot {
         m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, Utils.fpgaToCurrentTime(llMeasurement.timestampSeconds));
       }
     }
+        // Mat mat = new Mat();
+        // if (cvSink.grabFrame(mat) == 0) {
+        //     // Send the output the error.
+        //     outputStream.notifyError(cvSink.getError());
+        // }
+        // else{
+        //   Imgproc.rectangle(
+        //             mat, new Point(100, 100), new Point(400, 400), new Scalar(255, 255, 255), 5);
+        //   outputStream.putFrame(mat);
+        // }
   }
 
   @Override

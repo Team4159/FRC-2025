@@ -25,6 +25,8 @@ public class Elevator extends SubsystemBase{
     //a planned position that can be stored for future use
     private double futureTarget;
 
+    private boolean zeroMode;
+
     private DCMotor elevatorGearbox = DCMotor.getNeoVortex(1);
     private ElevatorSim elevatorSim = new ElevatorSim(
         elevatorGearbox, 
@@ -44,13 +46,15 @@ public class Elevator extends SubsystemBase{
         motor = new SparkFlex(Constants.Elevator.elevatorMotorID, MotorType.kBrushless);
         //motorSim = new SparkFlexSim(motor, elevatorGearbox);
         //setGoalState(ElevatorState.STOW);
-        setFutureState(ElevatorState.INTAKE);
-        goToFutureState();
+        //zeroMode = true;
+        //setFutureState(ElevatorState.INTAKE);
+        ///goToFutureState();
     }
 
     /** @param position the desired final state of the elevator */
     public void setGoalState(ElevatorState desiredState){
         Constants.Elevator.elevatorPID.setGoal(desiredState.height);
+        SmartDashboard.putNumber("desiredPosition", desiredState.height);
     }
 
     /** @param position the desired final state of the elevator */
@@ -62,6 +66,7 @@ public class Elevator extends SubsystemBase{
     public void goToFutureState(){
         //targetPosition = futureTarget;
         Constants.Elevator.elevatorPID.setGoal(futureTarget);
+        SmartDashboard.putNumber("desiredPosition", futureTarget);
     }
 
     @Override
@@ -69,13 +74,31 @@ public class Elevator extends SubsystemBase{
         //System.out.println(elevatorSim.getPositionMeters());
         //System.out.println(targetPosition);
         //Constants.Elevator.elevatorPID.setGoal(targetPosition);
-        double PIDOutput = Constants.Elevator.elevatorPID.calculate(motor.getEncoder().getPosition()/Constants.Elevator.rotationsPerMeter);
-        double FFOutput = Constants.Elevator.elevatorFF.calculate(Constants.Elevator.elevatorPID.getSetpoint().velocity);
-        motor.setVoltage(PIDOutput + FFOutput);
-        SmartDashboard.putNumber("encoderPosition", motor.getEncoder().getPosition());
-        SmartDashboard.putNumber("height", getHeight());
-        SmartDashboard.putNumber("percent", motor.getAppliedOutput());
-        SmartDashboard.putNumber("desiredPosition", targetPosition);
+        if(!zeroMode){
+            double PIDOutput = Constants.Elevator.elevatorPID.calculate(motor.getEncoder().getPosition()/Constants.Elevator.rotationsPerMeter);
+            double FFOutput = Constants.Elevator.elevatorFF.calculate(Constants.Elevator.elevatorPID.getSetpoint().velocity);
+            motor.setVoltage((PIDOutput + FFOutput));
+            SmartDashboard.putNumber("encoderPosition", motor.getEncoder().getPosition());
+            SmartDashboard.putNumber("height", getHeight());
+            SmartDashboard.putNumber("percent", motor.getAppliedOutput());
+            if(motor.getReverseLimitSwitch().isPressed()){
+                motor.getEncoder().setPosition(0);
+            }
+            //SmartDashboard.putNumber("desiredPosition", targetPosition);
+        }
+        else{
+            motor.set(-0.2);
+            if(motor.getReverseLimitSwitch().isPressed()){
+                zeroMode = false;
+                motor.getEncoder().setPosition(0);
+                setGoalState(ElevatorState.INTAKE);
+            }
+        }
+        SmartDashboard.putBoolean("limit switch", motor.getReverseLimitSwitch().isPressed());
+    }
+
+    public void toggleZeroElevator(){
+        zeroMode = !zeroMode;
     }
 
     /** @return height of elevator in meters */

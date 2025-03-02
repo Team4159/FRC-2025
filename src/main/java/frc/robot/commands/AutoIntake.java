@@ -16,6 +16,7 @@ public class AutoIntake extends Command{
     private CoralManipulatorPivot coralManipulatorPivot;
     private CoralManipulatorRoller coralManipulatorRoller;
     private Elevator elevator;
+    private double timeOffset;
     private boolean useBeamBreak;
     private double simTimeOffset;
 
@@ -46,9 +47,10 @@ public class AutoIntake extends Command{
         System.out.println(Timer.getFPGATimestamp() - simTimeOffset);
         if(RobotBase.isSimulation() && Timer.getFPGATimestamp() - simTimeOffset > 5)
             return true;
-        if(useBeamBreak)
-            return coralManipulatorRoller.hasCoral();
-        return false;
+        if(coralManipulatorRoller.hasCoral() && timeOffset == 0){
+            timeOffset = Timer.getFPGATimestamp();
+        }
+        return useBeamBreak && coralManipulatorRoller.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 0;
     }
 
     @Override

@@ -18,19 +18,22 @@ public class Constants {
     public static final class Swerve{
         //bumpers included
         /** Units: meters */
-        public static final double width = Units.inchesToMeters(30);
+        public static final double width = Units.inchesToMeters(33);
         /** Units: meters */
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
         public static final double maxReefAutoAlignDistatnce = Units.inchesToMeters(120);
 
         //autoaim
-        public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(1, 0.75);
-        public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(10, 50);
-        public static final ProfiledPIDController translationController = new ProfiledPIDController(7, 0.01, 0, translationConstraints);
+        public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.25, 0.25);
+        public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(2, 2);
+        public static final ProfiledPIDController translationController = new ProfiledPIDController(0.5, 0.1, 0, translationConstraints);
         public static final ProfiledPIDController rotationController = new ProfiledPIDController(10, 0.1, 0.1, rotationConstraints){{
             enableContinuousInput(-Math.PI, Math.PI);
         }};
+
+        public static final double maxAccelFullExtension = 0.75;
+        public static final double maxAccelFullRetraction = 3;
     }
 
     public static final class Elevator{
@@ -43,20 +46,22 @@ public class Constants {
         public static final double maxHeight = Units.inchesToMeters(21);
         public static final double rotationsPerMeter = elevatorGearing / (Math.PI*spoolDiameter);
 
+        //public static final double zeroModeThreshold = 0;
+
         public static final double elevatorTolerance = 0.02;
 
-        public static final double kS = 0.05;
-        public static final double kG = 0.09 * 1.5;
-        public static final double kV = 26.12 * 1.5;//15.67/12;
-        public static final double kA = 0.02 * 1.5;//0.07/12;
+        public static final double kS = 0.15;
+        public static final double kG = 0.09 * 1.6;
+        public static final double kV = 26.12 * 1.6;//15.67/12;
+        public static final double kA = 0.02 * 1.6;//0.07/12;
         
         public static final ElevatorFeedforward elevatorFF = new ElevatorFeedforward(kS, kG, kV, kA);
 
-        public static final double kP = 50;
-        public static final double kI = 0.5;
+        public static final double kP = 70;
+        public static final double kI = 5;
         public static final double kD = 0;
         public static final double maxVelocity = 1000;
-        public static final double maxAcceleration = 0;
+        public static final double maxAcceleration = 30;
 
         //public static final TrapezoidProfile.Constraints trapezoidProfileConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
         public static final TrapezoidProfile.Constraints PIDConstraints = new Constraints(maxVelocity, maxAcceleration);
@@ -66,10 +71,10 @@ public class Constants {
         public static enum ElevatorState{
             STOW(Units.inchesToMeters(0)),
             INTAKE(Units.inchesToMeters(0)),
-            L1(Units.inchesToMeters(6)),
-            L2(Units.inchesToMeters(13)),
-            L3(Units.inchesToMeters(18)),
-            L4(Units.inchesToMeters(21));
+            L1(Units.inchesToMeters(3)),
+            L2(Units.inchesToMeters(3)),
+            L3(Units.inchesToMeters(10)),
+            L4(Units.inchesToMeters(22));
 
             public double height;
             private ElevatorState(double height){
@@ -79,7 +84,7 @@ public class Constants {
     }
 
     public static final class CoralManipulator{
-        public static final int angleMotorID = 4;
+        public static final int angleMotorID = 14;//4
         public static final int rollerMotorID = 5;
         public static final int beamBreakDIO = 9;
 
@@ -87,18 +92,21 @@ public class Constants {
         public static final double MOI = 0.2466;
         public static final double lengthMeters = 0.405;
 
-        public static final double kS = 0.4;
-        public static final double kG = 0.40;//0.8/12;//1.45/12;//2.45/12;
+        public static final double kS = 0.5;
+        //kg = 0.17 for new coral manipulator
+        public static final double kG = 0.34;//0.8/12;//1.45/12;//2.45/12;
         public static final double kV = 1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
         public static final double kA = 0.02;//0.03/12;//0.05/12;//0.15/12;
 
         public static final ArmFeedforward angleFF = new ArmFeedforward(kS, kG, kV, kA);
 
-        public static final double kP = 0.85;
+        public static final double kP = 0.9;
         public static final double kI = 0.008;
         public static final double kD = 0;
         public static final double maxVelocity = 5;
         public static final double maxAcceleration = 5;
+
+        public static final double FFOffset = Units.rotationsToRadians(-0.1);
 
         public static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
         public static final ProfiledPIDController anglePID = new ProfiledPIDController(kP, kI, kD, constraints);
@@ -108,10 +116,11 @@ public class Constants {
         public static enum CoralManipulatorPivotState{
             STOW(0),
             INTAKE(Units.degreesToRadians(20)),
-            TROUGH(Units.degreesToRadians(225)),
-            L2AND3(Units.degreesToRadians(200)),
-            L4SETUP(Units.degreesToRadians(250)),
-            L4FINAL(Units.degreesToRadians(220));
+            TROUGH(Units.degreesToRadians(200)),
+            L2(Units.degreesToRadians(220)),
+            L3(Units.degreesToRadians(220)),
+            L4SETUP(Units.degreesToRadians(210)),
+            L4FINAL(Units.degreesToRadians(210));
 
             public double angle;
             private CoralManipulatorPivotState(double angle){

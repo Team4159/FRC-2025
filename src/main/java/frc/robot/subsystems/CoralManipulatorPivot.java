@@ -51,9 +51,9 @@ public class CoralManipulatorPivot extends SubsystemBase{
 
     @Override
     public void periodic(){
-        Constants.CoralManipulator.anglePID.setGoal(targetPosition);
-        double pid = Constants.CoralManipulator.anglePID.calculate(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()));
-        double ff = Constants.CoralManipulator.angleFF.calculate(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+        Constants.CoralManipulator.anglePID.setGoal(targetPosition + Constants.CoralManipulator.FFOffset);
+        double pid = Constants.CoralManipulator.anglePID.calculate(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset);
+        double ff = Constants.CoralManipulator.angleFF.calculate(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset, Constants.CoralManipulator.anglePID.getSetpoint().velocity);
         angleMotor.setVoltage(ff + pid);
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
         SmartDashboard.putNumber("armposition", Units.rotationsToDegrees(angleMotor.getAbsoluteEncoder().getPosition()));

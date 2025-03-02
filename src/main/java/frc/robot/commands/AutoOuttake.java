@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
@@ -35,6 +36,9 @@ public class AutoOuttake extends Command{
     public void initialize(){
         coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.OUTTAKE);
         backupTimeOffset = Timer.getFPGATimestamp();
+        // if(coralManipulatorPivot.isL4()){
+        //     coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.L4FINAL);
+        // }
     }
 
     @Override
@@ -43,16 +47,17 @@ public class AutoOuttake extends Command{
         if(!coralManipulatorRoller.hasCoral() && timeOffset == 0){
             timeOffset = Timer.getFPGATimestamp();
         }
-        return (!coralManipulatorRoller.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 0.5 )|| 
+        return (!coralManipulatorRoller.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 1.5 )|| 
                (backupTimer && Timer.getFPGATimestamp() - backupTimeOffset > 2);
+        //return false;
     }
 
     @Override
     public void end(boolean interrupted){
         coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.OFF);
         if(!interrupted){
-            coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.INTAKE);
-            elevator.setGoalState(ElevatorState.INTAKE);
+            //coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.INTAKE);
+            //elevator.setGoalState(ElevatorState.INTAKE);
         }
     }
 }
