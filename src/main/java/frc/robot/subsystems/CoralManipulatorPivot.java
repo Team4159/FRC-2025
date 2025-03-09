@@ -51,12 +51,16 @@ public class CoralManipulatorPivot extends SubsystemBase{
 
     @Override
     public void periodic(){
-        Constants.CoralManipulator.anglePID.setGoal(targetPosition + Constants.CoralManipulator.FFOffset);
-        double pid = Constants.CoralManipulator.anglePID.calculate(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset);
-        double ff = Constants.CoralManipulator.angleFF.calculate(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset, Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+        Constants.CoralManipulator.anglePID.setGoal(targetPosition);
+        double pid = Constants.CoralManipulator.anglePID.calculate(getAngle());
+        double ff = Constants.CoralManipulator.angleFF.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
         angleMotor.setVoltage(ff + pid);
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
-        SmartDashboard.putNumber("armposition", Units.rotationsToDegrees(angleMotor.getAbsoluteEncoder().getPosition()));
+        SmartDashboard.putNumber("armposition", Units.radiansToDegrees(getAngle()));
+    }
+
+    public double getAngle(){
+        return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset;
     }
 
     // public void simulationPeriodic(){
@@ -91,7 +95,7 @@ public class CoralManipulatorPivot extends SubsystemBase{
     /** @param desiredState desired final state of coral manipulator pivot */
     public void setGoalState(CoralManipulatorPivotState desiredState){
         targetPosition = desiredState.angle;
-        Constants.CoralManipulator.anglePID.reset(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()));
+        Constants.CoralManipulator.anglePID.reset(getAngle());
         if(desiredState.equals(CoralManipulatorPivotState.L4SETUP)){
             isL4 = true;
         }

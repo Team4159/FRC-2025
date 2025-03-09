@@ -64,14 +64,16 @@ public class Vision extends SubsystemBase{
         double[] visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
         visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
         double area = limelight.getEntry("ta").getDouble(0.25);
-        drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.7, 1 - area * 0.7, Double.MAX_VALUE));
-        drivetrain.addVisionMeasurement(visionPose, Units.millisecondsToSeconds(
-            limelight.getEntry("cl").getDouble(0) +
-            limelight.getEntry("tl").getDouble(0)
-        ));
+        // drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.7, 1 - area * 0.7, Double.MAX_VALUE));
+        // drivetrain.addVisionMeasurement(visionPose, Units.millisecondsToSeconds(
+        //     limelight.getEntry("cl").getDouble(0) +
+        //     limelight.getEntry("tl").getDouble(0)
+        // ));
         visionField.setRobotPose(visionPose);
     }
     public void forceVision(){
-        if(visionPose != null && visionPose.equals(new Pose2d(new Translation2d(), drivetrain.getState().Pose.getRotation())) == false) drivetrain.resetPose(visionPose);
+        if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0))){
+            drivetrain.resetPose(visionPose);
+        }
     }
 }

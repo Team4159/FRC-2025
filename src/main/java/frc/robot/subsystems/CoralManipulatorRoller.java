@@ -17,6 +17,7 @@ public class CoralManipulatorRoller extends SubsystemBase{
     public CoralManipulatorRoller(){
         rollerMotor = new SparkMax(Constants.CoralManipulator.rollerMotorID, MotorType.kBrushless);
         beamBreak = new DigitalInput(Constants.CoralManipulator.beamBreakDIO);
+        setGoalState(CoralManipulatorRollerState.PASSIVE);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class CoralManipulatorRoller extends SubsystemBase{
 
         @Override
         public void end(boolean interrupted){
-            CoralManipulatorRoller.this.setGoalState(CoralManipulatorRollerState.OFF);
+            CoralManipulatorRoller.this.setGoalState(CoralManipulatorRollerState.PASSIVE);
         }
     }
 }

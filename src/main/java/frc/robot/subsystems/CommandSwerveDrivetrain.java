@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -16,14 +17,21 @@ import choreo.trajectory.SwerveSample;
 import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -76,6 +84,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         enableContinuousInput(-Math.PI, Math.PI);
     }};
 
+    private QuestNav questNav = new QuestNav();
+
     //private double desiredYaw;
 
     private final SwerveRequest.ApplyFieldSpeeds m_driveApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
@@ -87,6 +97,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
     private final Field2d closestPoseF2d = new Field2d();
+    private final Field2d oculusF2d = new Field2d();
     private Pose2d closestAutoAlignPose = new Pose2d();
     private Pose2d secondClosestAutoAlignPose = new Pose2d();
     private Pose2d closestStationAutoAlignPose = new Pose2d();
@@ -240,10 +251,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void zero(){
         Rotation2d offset = new Rotation2d();
         if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)) offset = new Rotation2d(Math.PI);
-        resetPose(new Pose2d(getState().Pose.getTranslation(), offset));
+        //resetPose(new Pose2d(getState().Pose.getTranslation(), offset));
+        resetPose(getOculusPose());
+        questNav.zeroHeading();
         //desiredYaw = offset.getRadians();
     }
-
+    
     /**
      * Creates a new auto factory for this drivetrain.
      *
@@ -263,6 +276,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public AutoFactory createAutoFactory(TrajectoryLogger<SwerveSample> trajLogger) {
         return new AutoFactory(
             () -> getState().Pose,
+            //() -> getOculusPose(),
             this::resetPose,
             this::followPath,
             true,
@@ -285,6 +299,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.elevator = elevator;
     }
 
+    @Override 
+    public void resetPose(Pose2d newPose){
+        super.resetPose(newPose);
+        questNav.resetPosition(newPose);
+    }
+
     /**
      * Follows the given field-centric path sample with PID.
      *
@@ -294,6 +314,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_pathThetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         var pose = getState().Pose;
+        //var pose = getOculusPose();
 
         var targetSpeeds = sample.getChassisSpeeds();
         targetSpeeds.vxMetersPerSecond += m_pathXController.calculate(
@@ -354,14 +375,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             reefTranslation = new Translation2d(Constants.Field.fieldLength/2 + Constants.Field.reefDistFromCenter, Constants.Field.fieldWidth/2);
         Pose2d processor = Constants.Field.processors.get(DriverStation.getAlliance().orElse(Alliance.Blue));
         if(getState().Pose.getTranslation().getDistance(reefTranslation) < Constants.Swerve.maxReefAutoAlignDistatnce){
+        //if(getOculusPose().getTranslation().getDistance(reefTranslation) < Constants.Swerve.maxReefAutoAlignDistatnce){
             var reefPoses = Constants.Field.reef.get(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
             var closestSide = getState().Pose.nearest(reefPoses);
+            //var closestSide = getOculusPose().nearest(reefPoses);
             var angle = closestSide.getRotation().getRadians() - Math.PI/2;
             //closestAutoAlignPose = new Pose2d(closestSide.getX() + Units.inchesToMeters(Constants.Field.middletoPole) * Math.cos(angle), closestSide.getY() + Units.inchesToMeters(Constants.Field.middletoPole) * Math.sin(angle), closestSide.getRotation());
             //secondClosestAutoAlignPose = new Pose2d(closestSide.getX() - Units.inchesToMeters(Constants.Field.middletoPole) * Math.cos(angle), closestSide.getY() - Units.inchesToMeters(Constants.Field.middletoPole) * Math.sin(angle), closestSide.getRotation());
             var p1 = new Pose2d(closestSide.getX() + Constants.Field.middletoPole * Math.cos(angle), closestSide.getY() + Constants.Field.middletoPole * Math.sin(angle), closestSide.getRotation());
             var p2 = new Pose2d(closestSide.getX() - Constants.Field.middletoPole * Math.cos(angle), closestSide.getY() - Constants.Field.middletoPole * Math.sin(angle), closestSide.getRotation());
             if(p1.getTranslation().getDistance(getState().Pose.getTranslation()) < p2.getTranslation().getDistance(getState().Pose.getTranslation())){
+            //if(p1.getTranslation().getDistance(getOculusPose().getTranslation()) < p2.getTranslation().getDistance(getOculusPose().getTranslation())){
                 closestAutoAlignPose = p1;
                 secondClosestAutoAlignPose = p2;
             }
@@ -371,11 +395,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
         }
         else if(getState().Pose.getTranslation().getDistance(processor.getTranslation()) < Constants.Swerve.maxReefAutoAlignDistatnce){
+        //else if(getOculusPose().getTranslation().getDistance(processor.getTranslation()) < Constants.Swerve.maxReefAutoAlignDistatnce){
             closestAutoAlignPose = processor;
         }
         else{
             var reefPoses = Constants.Field.stations.get(DriverStation.getAlliance().orElse(Alliance.Blue));
             closestAutoAlignPose = getState().Pose.nearest(reefPoses);
+            //closestAutoAlignPose = getOculusPose().nearest(reefPoses);
         }
     }
 
@@ -435,8 +461,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         calculateClosestReef();
         closestPoseF2d.getObject("closestPose").setPose(closestAutoAlignPose);
         closestPoseF2d.setRobotPose(getState().Pose);
+        //closestPoseF2d.setRobotPose(getOculusPose());
+        oculusF2d.setRobotPose(questNav.getPose());
+        SmartDashboard.putData("Oculus Pose", oculusF2d);
         SmartDashboard.putData("closest reef", closestPoseF2d);
+        SmartDashboard.putBoolean("Oculus connected", questNav.connected());
         setMaxAccel();
+        setVisionMeasurementStdDevs(VecBuilder.fill(0, 0, 0));
+        addVisionMeasurement(questNav.getPose(), questNav.timestamp());
+    }
+
+    public Pose2d getOculusPose(){
+        return questNav.getPose();
     }
 
     private void setMaxAccel(){

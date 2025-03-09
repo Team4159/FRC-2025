@@ -37,7 +37,7 @@ public class AutoIntake extends Command{
     @Override
     public void initialize(){
         coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.INTAKE);
-        coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.INTAKE);
+        //coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.INTAKE);
         elevator.setGoalState(ElevatorState.INTAKE);
         simTimeOffset = Timer.getFPGATimestamp();
     }
@@ -55,7 +55,7 @@ public class AutoIntake extends Command{
 
     @Override
     public void end(boolean interrupted){
-        coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.OFF);
+        coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.PASSIVE);
         //coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.L2AND3);
     }
 }

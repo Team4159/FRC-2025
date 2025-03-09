@@ -7,6 +7,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.opencv.core.Mat;
 
@@ -19,7 +21,12 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -35,9 +42,11 @@ import frc.robot.subsystems.ElevatorArmSimulation;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoOuttake;
+import frc.robot.commands.TrajSwerve;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralManipulatorPivot;
@@ -65,6 +74,7 @@ public class RobotContainer {
 
     //joysticks
     private final CommandJoystick driveStick = new CommandJoystick(0);
+
     private final CommandJoystick secondaryStick = new CommandJoystick(1);
 
     //triggers
@@ -75,10 +85,13 @@ public class RobotContainer {
     private final Trigger l3 = secondaryStick.button(6).or(joystick.circle());
     private final Trigger l4 = secondaryStick.button(7).or(joystick.triangle());
     private final Trigger raiseElevator = secondaryStick.button(3).or(joystick.L1());
+    private final Trigger forceVision = driveStick.button(3);
 
     private final Trigger zeroELevator = secondaryStick.button(16);
 
     //subsystems
+
+    public final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralManipulatorPivot coralManipulatorPivot = new CoralManipulatorPivot();
     private final CoralManipulatorRoller coralManipulatorRoller = new CoralManipulatorRoller();
@@ -154,6 +167,7 @@ public class RobotContainer {
 
         driveStick.button(5).whileTrue(new AutoAlign(drivetrain));
         driveStick.button(6).whileTrue(new AutoAlign(drivetrain, false, true));
+        //driveStick.button(6).whileTrue(new AutoAlign(drivetrain, true));
         driveStick.button(3).onTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
         //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
@@ -177,10 +191,11 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.L2().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        //forceVision.onTrue(drivetrain.forceVision());
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        outtake.onTrue(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator));
+        outtake.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
         intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
         l1.onTrue(new ParallelCommandGroup(
             elevator.new ChangeState(ElevatorState.L1, true),
@@ -199,12 +214,18 @@ public class RobotContainer {
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L4))));
         raiseElevator.onTrue(new InstantCommand(() -> elevator.goToFutureState()));
+
+        secondaryStick.button(12).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE));
+        secondaryStick.button(13).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true));
+
         zeroELevator.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
     }
 
     public Command getAutonomousCommand() {
         /* Run the routine selected from the auto chooser */
         //return autoChooser.selectedCommand();
-        return autoRoutines.getRoutine().cmd();
+        //return autoRoutines.getRoutine().cmd();
+        Trajectory traj = TrajectoryGenerator.generateTrajectory(new Pose2d(), new ArrayList<Translation2d>(), new Pose2d(1, 0, new Rotation2d()), new TrajectoryConfig(1, 1));
+        return new TrajSwerve(drivetrain, traj);
     }
 }

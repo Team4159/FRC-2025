@@ -47,12 +47,14 @@ public class Elevator extends SubsystemBase{
         //motorSim = new SparkFlexSim(motor, elevatorGearbox);
         //setGoalState(ElevatorState.STOW);
         //zeroMode = true;
+        setGoalState(ElevatorState.INTAKE);
         //setFutureState(ElevatorState.INTAKE);
         ///goToFutureState();
     }
 
     /** @param position the desired final state of the elevator */
     public void setGoalState(ElevatorState desiredState){
+        Constants.Elevator.elevatorPID.reset(getHeight());
         Constants.Elevator.elevatorPID.setGoal(desiredState.height);
         SmartDashboard.putNumber("desiredPosition", desiredState.height);
     }
