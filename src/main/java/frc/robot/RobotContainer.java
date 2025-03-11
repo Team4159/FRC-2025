@@ -46,6 +46,7 @@ import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoOuttake;
+import frc.robot.commands.AutoSwerve;
 import frc.robot.commands.TrajSwerve;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -160,10 +161,14 @@ public class RobotContainer {
         //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
         // );
 
-        driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0.15, 0));
-        driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, -0.15));
-        driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(secondaryStick, -0.15, 0));
-        driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, 0.15));
+        // driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0.15, 0));
+        // driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, -0.15));
+        // driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(secondaryStick, -0.15, 0));
+        // driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, 0.15));
+
+        // driveStick.pov(0).or(driveStick.pov(180)).whileTrue(new ManualDSAlign(drivetrain, 0));
+        // driveStick.pov(90).whileTrue(new ManualDSAlign(drivetrain, -0.15));
+        // driveStick.pov(270).whileTrue(new ManualDSAlign(drivetrain, 0.15));
 
         driveStick.button(5).whileTrue(new AutoAlign(drivetrain));
         driveStick.button(6).whileTrue(new AutoAlign(drivetrain, false, true));
@@ -196,7 +201,12 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         outtake.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
-        intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
+        //intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
+        intake.onTrue(new ParallelCommandGroup(
+            elevator.new ChangeState(ElevatorState.INTAKE, true),
+            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.INTAKE, false),
+            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.INTAKE)))
+            .onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
         l1.onTrue(new ParallelCommandGroup(
             elevator.new ChangeState(ElevatorState.L1, true),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.TROUGH, false)));
@@ -225,6 +235,7 @@ public class RobotContainer {
         /* Run the routine selected from the auto chooser */
         //return autoChooser.selectedCommand();
         //return autoRoutines.getRoutine().cmd();
+        drivetrain.resetPose(new Pose2d());
         Trajectory traj = TrajectoryGenerator.generateTrajectory(new Pose2d(), new ArrayList<Translation2d>(), new Pose2d(1, 0, new Rotation2d()), new TrajectoryConfig(1, 1));
         return new TrajSwerve(drivetrain, traj);
     }

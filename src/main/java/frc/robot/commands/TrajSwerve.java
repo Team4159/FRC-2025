@@ -7,6 +7,9 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -16,30 +19,39 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CommandSwerveDrivetrain.Drive;
 
 public class TrajSwerve extends Command {
-    private SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
-    private static final HolonomicDriveController controller = new HolonomicDriveController(
+    protected SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+    protected static final HolonomicDriveController controller = new HolonomicDriveController(
             new PIDController(1, 0, 0),
             new PIDController(1, 0, 0),
             new ProfiledPIDController(1, 0, 0,
                     new TrapezoidProfile.Constraints(1, 1)));
     
-    private CommandSwerveDrivetrain swerve;
-    private Trajectory trajectory;
+    protected CommandSwerveDrivetrain swerve;
+    protected Trajectory trajectory;
 
-    private final Timer timer = new Timer();
+    protected final Timer timer = new Timer();
 
     // public TrajSwerve(CommandSwerveDrivetrain s, RobotState end) {
     //     swerve = s;
     //     trajectory = TrajectoryGenerator.generateTrajectory(kinesthetics.getPose(), new ArrayList<>(), end, new TrajectoryConfig(AutoConfig.kMaxAccelerationMetersPerSecondSquared, AutoConfig.kMaxAccelerationMetersPerSecondSquared));
     //     addRequirements(swerve);
     // }
+    public TrajSwerve(CommandSwerveDrivetrain s){
+        swerve = s;
+    }
 
     public TrajSwerve(CommandSwerveDrivetrain s, Trajectory t) {
         swerve = s;
         trajectory = t;
         addRequirements(swerve);
+    }
+
+    public TrajSwerve(CommandSwerveDrivetrain s, Pose2d finalPose) {
+        swerve = s;
+        trajectory = TrajectoryGenerator.generateTrajectory(swerve.getState().Pose, new ArrayList<Translation2d>(), finalPose, new TrajectoryConfig(1, 1));
     }
 
     @Override
@@ -55,6 +67,7 @@ public class TrajSwerve extends Command {
         //     controller.calculate(kinesthetics.getPose(), state, state.poseMeters.getRotation())
         // ));
         ChassisSpeeds speeds = controller.calculate(swerve.getState().Pose, state, state.poseMeters.getRotation());
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, swerve.getState().Pose.getRotation());
         swerve.setControl(applyRobotSpeeds.withSpeeds(speeds));
         
     }
@@ -68,6 +81,11 @@ public class TrajSwerve extends Command {
     public void end(boolean interrupted) {
         timer.stop();
         super.end(interrupted);
+    }
+
+    public void setDesiredPose(Pose2d desiredPose){
+        timer.reset();
+        trajectory = TrajectoryGenerator.generateTrajectory(swerve.getState().Pose, new ArrayList<Translation2d>(), desiredPose, new TrajectoryConfig(1, 1));
     }
 }
 

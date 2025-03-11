@@ -17,10 +17,14 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Constants {
     public static final class Swerve{
+        public static final int distanceSensorPingDIO = 0;
+        public static final int distanceSensorEchoDIO = 1;
+        //accounts for dist sensor is located behind bumper
+        public static final double distSensorAutoAlignDistInches = 6;
         //bumpers included
         /** Units: meters */
         public static final double width = Units.inchesToMeters(33);
-        public static final double distFromReef = Units.inchesToMeters(3.5);
+        public static final double distFromReefBase = Units.inchesToMeters(3.5);
         /** Units: meters */
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
@@ -28,13 +32,13 @@ public class Constants {
 
         //autoaim
         public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.75, 0.5);
-        public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(2, 2);
+        public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(3, 3);
         public static final ProfiledPIDController translationController = new ProfiledPIDController(2, 0.5, 0, translationConstraints);
         public static final ProfiledPIDController rotationController = new ProfiledPIDController(7, 0.1, 0.1, rotationConstraints){{
             enableContinuousInput(-Math.PI, Math.PI);
         }};
 
-        public static final double maxAccelFullExtension = 0.75;
+        public static final double maxAccelFullExtension = 2;
         public static final double maxAccelFullRetraction = 3;
     }
 
@@ -76,7 +80,7 @@ public class Constants {
             INTAKE(Units.inchesToMeters(0)),
             L1(Units.inchesToMeters(2)),
             L2(Units.inchesToMeters(2)),
-            L3(Units.inchesToMeters(7)),
+            L3(Units.inchesToMeters(7.3)),
             L4(Units.inchesToMeters(22));
 
             public double height;
@@ -180,39 +184,39 @@ public class Constants {
         public static final double reefDistFromCenter = Units.inchesToMeters(168.692);
 
         public static final List<Pose2d> reefBlue = List.of(
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(183.259) + (poleDist + Swerve.width/2)*Math.cos(2*Math.PI/3), fieldWidth/2 + Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(2*Math.PI/3), new Rotation2d(-Math.PI/3)),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(199.431) - (poleDist + Swerve.width/2), fieldWidth/2, new Rotation2d()),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(183.259) + (poleDist + Swerve.width/2)*Math.cos(-2*Math.PI/3), fieldWidth/2 - Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(-2*Math.PI/3), new Rotation2d(Math.PI/3)),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(153.728) + (poleDist + Swerve.width/2)*Math.cos(-Math.PI/3), fieldWidth/2 - Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(-Math.PI/3), new Rotation2d(2*Math.PI/3)),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(137.999) + (poleDist + Swerve.width/2), fieldWidth/2, new Rotation2d(Math.PI)),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(153.728) + (poleDist + Swerve.width/2)*Math.cos(Math.PI/3), fieldWidth/2 + Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(Math.PI/3), new Rotation2d(-2*Math.PI/3))
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(183.259) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(2*Math.PI/3), fieldWidth/2 + Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(2*Math.PI/3), new Rotation2d(-Math.PI/3)),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(199.431) - (poleDist + Swerve.distFromReefBase + Swerve.width/2), fieldWidth/2, new Rotation2d()),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(183.259) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(-2*Math.PI/3), fieldWidth/2 - Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(-2*Math.PI/3), new Rotation2d(Math.PI/3)),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(153.728) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(-Math.PI/3), fieldWidth/2 - Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(-Math.PI/3), new Rotation2d(2*Math.PI/3)),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(137.999) + (poleDist + Swerve.distFromReefBase + Swerve.width/2), fieldWidth/2, new Rotation2d(Math.PI)),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(153.728) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(Math.PI/3), fieldWidth/2 + Units.inchesToMeters(26.487) + (poleDist+ Swerve.distFromReefBase + Swerve.width/2)*Math.sin(Math.PI/3), new Rotation2d(-2*Math.PI/3))
         );
 
         public static final List<Pose2d> reefRed = List.of(
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(183.259) + (poleDist + Swerve.width/2)*Math.cos(Math.PI/3), fieldWidth/2  + Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(Math.PI/3), new Rotation2d(-2*Math.PI/3)),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(199.431) + (poleDist + Swerve.width/2), fieldWidth/2, new Rotation2d(Math.PI)),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(183.259) + (poleDist + Swerve.width/2)*Math.cos(-Math.PI/3), fieldWidth/2  - Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(-Math.PI/3), new Rotation2d(2*Math.PI/3)),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(153.728) + (poleDist + Swerve.width/2)*Math.cos(-2*Math.PI/3), fieldWidth/2  - Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(-2*Math.PI/3), new Rotation2d(Math.PI/3)),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(137.999) - (poleDist + Swerve.width/2), fieldWidth/2, new Rotation2d()),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(153.728) + (poleDist + Swerve.width/2)*Math.cos(2*Math.PI/3), fieldWidth/2  + Units.inchesToMeters(26.487) + (poleDist + Swerve.width/2)*Math.sin(2*Math.PI/3), new Rotation2d(-Math.PI/3))
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(183.259) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(Math.PI/3), fieldWidth/2  + Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(Math.PI/3), new Rotation2d(-2*Math.PI/3)),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(199.431) + (poleDist + Swerve.distFromReefBase + Swerve.width/2), fieldWidth/2, new Rotation2d(Math.PI)),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(183.259) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(-Math.PI/3), fieldWidth/2  - Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(-Math.PI/3), new Rotation2d(2*Math.PI/3)),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(153.728) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(-2*Math.PI/3), fieldWidth/2  - Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(-2*Math.PI/3), new Rotation2d(Math.PI/3)),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(137.999) - (poleDist + Swerve.distFromReefBase + Swerve.width/2), fieldWidth/2, new Rotation2d()),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(153.728) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.cos(2*Math.PI/3), fieldWidth/2  + Units.inchesToMeters(26.487) + (poleDist + Swerve.distFromReefBase + Swerve.width/2)*Math.sin(2*Math.PI/3), new Rotation2d(-Math.PI/3))
         );
 
         public static final List<Pose2d> coralStationsBlue = List.of(
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(331.175) + (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(119.416) + (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 - 35.899))),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(312.767) + (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(133.519) + (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 - 35.899))),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(292.336) + (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(147.622) + (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 - 35.899))),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(331.175) + (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(119.416) - (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 + 35.899))),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(312.767) + (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(133.519) - (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 + 35.899))),
-            new Pose2d(fieldLength/2 - Units.inchesToMeters(292.336) + (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(147.622) - (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 + 35.899)))
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(331.175) + (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(119.416) + (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 - 35.899))),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(312.767) + (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(133.519) + (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 - 35.899))),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(292.336) + (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(147.622) + (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 - 35.899))),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(331.175) + (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(119.416) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 + 35.899))),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(312.767) + (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(133.519) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 + 35.899))),
+            new Pose2d(fieldLength/2 - Units.inchesToMeters(292.336) + (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(147.622) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 + 35.899)))
         );
 
         public static final List<Pose2d> coralStationsRed = List.of(
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(331.175) - (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(119.416) + (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 + 35.899))),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(312.767) - (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(133.519) + (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 + 35.899))),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(292.336) - (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(147.622) + (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 + 35.899))),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(331.175) - (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(119.416) - (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899))),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(312.767) - (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(133.519) - (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899))),
-            new Pose2d(fieldLength/2 + Units.inchesToMeters(292.336) - (Swerve.width/2 + reefDistFromCenter) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(147.622) - (Swerve.width/2 + reefDistFromCenter) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899)))
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(331.175) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(119.416) + (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 + 35.899))),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(312.767) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(133.519) + (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 + 35.899))),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(292.336) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 - Units.inchesToMeters(147.622) + (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(90 + 35.899))),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(331.175) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(119.416) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899))),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(312.767) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(133.519) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899))),
+            new Pose2d(fieldLength/2 + Units.inchesToMeters(292.336) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(147.622) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899)))
         );
 
         public static final Map<DriverStation.Alliance, List<Pose2d>> reef = Map.of(

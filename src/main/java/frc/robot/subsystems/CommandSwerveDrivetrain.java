@@ -251,8 +251,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void zero(){
         Rotation2d offset = new Rotation2d();
         if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)) offset = new Rotation2d(Math.PI);
-        //resetPose(new Pose2d(getState().Pose.getTranslation(), offset));
-        resetPose(getOculusPose());
+        resetPose(new Pose2d(getState().Pose.getTranslation(), offset));
         questNav.zeroHeading();
         //desiredYaw = offset.getRadians();
     }
@@ -358,7 +357,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             speedX *= -1;
             speedY *= -1;
         }
-        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega);
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega* 4);
         setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
     }
 
@@ -406,11 +405,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Pose2d getDesieredAutoAlignPose(boolean L4, boolean useSecondClosestPose){
-        if(L4){
-            var angle = closestAutoAlignPose.getRotation().getRadians() - Math.PI;
-            closestAutoAlignPose = new Pose2d(closestAutoAlignPose.getX() + Constants.Swerve.L4Offset * Math.cos(angle), closestAutoAlignPose.getY() + Constants.Swerve.L4Offset * Math.sin(angle), closestAutoAlignPose.getRotation());
-            secondClosestAutoAlignPose = new Pose2d(secondClosestAutoAlignPose.getX() + Constants.Swerve.L4Offset * Math.cos(angle), secondClosestAutoAlignPose.getY() + Constants.Swerve.L4Offset * Math.sin(angle), secondClosestAutoAlignPose.getRotation());
-        }
+        // if(L4){
+        //     var angle = closestAutoAlignPose.getRotation().getRadians() - Math.PI;
+        //     closestAutoAlignPose = new Pose2d(closestAutoAlignPose.getX() + Constants.Swerve.L4Offset * Math.cos(angle), closestAutoAlignPose.getY() + Constants.Swerve.L4Offset * Math.sin(angle), closestAutoAlignPose.getRotation());
+        //     secondClosestAutoAlignPose = new Pose2d(secondClosestAutoAlignPose.getX() + Constants.Swerve.L4Offset * Math.cos(angle), secondClosestAutoAlignPose.getY() + Constants.Swerve.L4Offset * Math.sin(angle), secondClosestAutoAlignPose.getRotation());
+        // }
         if(useSecondClosestPose){
             return secondClosestAutoAlignPose;
         }
