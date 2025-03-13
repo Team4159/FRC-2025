@@ -42,6 +42,29 @@ public class Constants {
         public static final double maxAccelFullRetraction = 3;
     }
 
+    public static final class Deepclimb {
+        public static enum deepClimbStates {
+            FORWARD(1),
+            BACKWARD(-1);
+
+            public final double speed;        
+             
+            // take enum paremter that is deep climb states, set motor speed to state.speed
+            private deepClimbStates(double s){
+                speed = s;
+            }
+
+            // public double getSpeed_deepClimb(){
+            //     return speed;
+            // }
+        }
+        
+        
+        public static final double forwardSoftLimit = 10;
+        public static final int deviceID = 7;
+        public static final double reverseSoftLimit = 0;
+    }
+    
     public static final class Elevator{
         public static final int elevatorMotorID = 6;
         public static final int limitSwitchPort = 0;
@@ -54,18 +77,18 @@ public class Constants {
 
         //public static final double zeroModeThreshold = 0;
 
-        public static final double elevatorTolerance = 0.02;
+        public static final double elevatorTolerance = 0.0025;
 
         public static final double kS = 0.15;
         //factors in cf spring
-        public static final double kG = 0.03;//0.09 * 1.6;
+        public static final double kG = 0.04;//0.09 * 1.6;
         public static final double kV = 26.12;//26.12 * 1.6;//15.67/12;
         public static final double kA = 0.01;//0.02 * 1.6;//0.07/12;
         
         public static final ElevatorFeedforward elevatorFF = new ElevatorFeedforward(kS, kG, kV, kA);
 
         public static final double kP = 40;
-        public static final double kI = 1;
+        public static final double kI = 6;
         public static final double kD = 0;
         public static final double maxVelocity = 3;
         public static final double maxAcceleration = 3;
@@ -81,7 +104,7 @@ public class Constants {
             L1(Units.inchesToMeters(2)),
             L2(Units.inchesToMeters(2)),
             L3(Units.inchesToMeters(7.3)),
-            L4(Units.inchesToMeters(22));
+            L4(Units.inchesToMeters(21.5));
 
             public double height;
             private ElevatorState(double height){
@@ -100,15 +123,14 @@ public class Constants {
         public static final double lengthMeters = 0.405;
 
         public static final double kS = 0;
-        public static final double kG = 0.17
-        ;//0.34;//0.8/12;//1.45/12;//2.45/12;
-        public static final double kV = 1.69/2;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
+        public static final double kG = 0.2;//0.34;//0.8/12;//1.45/12;//2.45/12;
+        public static final double kV = 1.69/3;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
         public static final double kA = 0.01;//0.03/12;//0.05/12;//0.15/12;
 
         public static final ArmFeedforward angleFF = new ArmFeedforward(kS, kG, kV, kA);
 
-        public static final double kP = 1.3;
-        public static final double kI = 0.07;
+        public static final double kP = 2;
+        public static final double kI = 0.05;
         public static final double kD = 0;
         public static final double maxVelocity = 7;
         public static final double maxAcceleration = 7;
@@ -118,16 +140,16 @@ public class Constants {
         public static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
         public static final ProfiledPIDController anglePID = new ProfiledPIDController(kP, kI, kD, constraints);
 
-        public static final double angleTolerance = Math.PI/64;
+        public static final double angleTolerance = Math.PI/16;
 
         public static enum CoralManipulatorPivotState{
             STOW(0),
             INTAKE(Units.degreesToRadians(0)),
             TROUGH(Units.degreesToRadians(200)),
             L2(Units.degreesToRadians(200)),
-            L3(Units.degreesToRadians(182)),
-            L4SETUP(Units.degreesToRadians(190)),
-            L4FINAL(Units.degreesToRadians(190));
+            L3(Units.degreesToRadians(190)),
+            L4SETUP(Units.degreesToRadians(196)),
+            L4FINAL(Units.degreesToRadians(196));
 
             public double angle;
             private CoralManipulatorPivotState(double angle){
@@ -160,8 +182,8 @@ public class Constants {
 
         public static enum AlgaeIntakeState {
             STOW(1.85, 0),
-            INTAKE(0.5, 1),
-            OUTTAKE(0.7, -1);
+            INTAKE(0.5, -1),
+            OUTTAKE(0.7, 1);
             public final double speed;
             public final double angle;
             private AlgaeIntakeState(double a, double s) {

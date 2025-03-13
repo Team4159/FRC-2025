@@ -359,6 +359,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega* 4);
         setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
+        
     }
 
     public void stopSwerve(){

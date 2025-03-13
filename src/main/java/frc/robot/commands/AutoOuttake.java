@@ -56,8 +56,8 @@ public class AutoOuttake extends Command{
     public void end(boolean interrupted){
         coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.PASSIVE);
         if(!interrupted){
-            //coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.INTAKE);
-            //elevator.setGoalState(ElevatorState.INTAKE);
+            coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.INTAKE);
+            elevator.setGoalState(ElevatorState.INTAKE);
         }
     }
 }

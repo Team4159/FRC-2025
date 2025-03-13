@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
@@ -76,13 +77,10 @@ public class Elevator extends SubsystemBase{
         //System.out.println(elevatorSim.getPositionMeters());
         //System.out.println(targetPosition);
         //Constants.Elevator.elevatorPID.setGoal(targetPosition);
-        if(!zeroMode){
-            double PIDOutput = Constants.Elevator.elevatorPID.calculate(motor.getEncoder().getPosition()/Constants.Elevator.rotationsPerMeter);
+        if(!zeroMode && DriverStation.isEnabled()){
+            double PIDOutput = Constants.Elevator.elevatorPID.calculate(getHeight());
             double FFOutput = Constants.Elevator.elevatorFF.calculate(Constants.Elevator.elevatorPID.getSetpoint().velocity);
             motor.setVoltage((PIDOutput + FFOutput));
-            SmartDashboard.putNumber("encoderPosition", motor.getEncoder().getPosition());
-            SmartDashboard.putNumber("height", getHeight());
-            SmartDashboard.putNumber("percent", motor.getAppliedOutput());
             if(motor.getReverseLimitSwitch().isPressed()){
                 motor.getEncoder().setPosition(0);
             }
@@ -96,6 +94,9 @@ public class Elevator extends SubsystemBase{
                 setGoalState(ElevatorState.INTAKE);
             }
         }
+        SmartDashboard.putNumber("encoderPosition", motor.getEncoder().getPosition());
+        SmartDashboard.putNumber("height", getHeight());
+        SmartDashboard.putNumber("percent", motor.getAppliedOutput());
         SmartDashboard.putBoolean("limit switch", motor.getReverseLimitSwitch().isPressed());
     }
 
@@ -162,7 +163,9 @@ public class Elevator extends SubsystemBase{
 
         @Override
         public boolean isFinished(){
-            return !continuous && MathUtil.isNear(getHeight(), targetPosition, Constants.Elevator.elevatorTolerance);
+            //System.out.println("elevator: " + MathUtil.isNear(getHeight(), targetPosition, Constants.Elevator.elevatorTolerance));
+            System.out.println(getHeight() + " " + Constants.Elevator.elevatorPID.getGoal().position);
+            return !continuous && MathUtil.isNear(getHeight(), Constants.Elevator.elevatorPID.getGoal().position, Constants.Elevator.elevatorTolerance);
         }
     }
 }

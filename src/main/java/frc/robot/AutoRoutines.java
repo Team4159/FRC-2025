@@ -152,8 +152,8 @@ public class AutoRoutines extends SubsystemBase{
             starttoR1.resetOdometry()
             .andThen(
                 new ParallelCommandGroup(
-                    //coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false),
-                    //elevator.new ChangeState(ElevatorState.L4, false),
+                    coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false),
+                    elevator.new ChangeState(ElevatorState.L4, false),
                     new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
             .andThen(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator, true))
             // .andThen(new SequentialCommandGroup(R1toS1.cmd(), new InstantCommand(() -> swerve.stopSwerve())))

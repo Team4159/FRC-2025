@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ElevatorArmSimulation;
+import frc.robot.subsystems.Deepclimb;
 //import frc.robot.subsystems.ElevatorArmSimulation;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
@@ -92,11 +93,12 @@ public class RobotContainer {
 
     //subsystems
 
-    public final AlgaeIntake algaeIntake = new AlgaeIntake();
+    private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralManipulatorPivot coralManipulatorPivot = new CoralManipulatorPivot();
     private final CoralManipulatorRoller coralManipulatorRoller = new CoralManipulatorRoller();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final Deepclimb deepclimb = new Deepclimb();
 
     //simulation
     private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, coralManipulatorPivot);
@@ -208,19 +210,19 @@ public class RobotContainer {
             coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
         l1.onTrue(new ParallelCommandGroup(
-            elevator.new ChangeState(ElevatorState.L1, true),
+            elevator.new ChangeState(ElevatorState.L1, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.TROUGH, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L1))));
         l2.onTrue(new ParallelCommandGroup(
-            elevator.new ChangeState(ElevatorState.L2, true),
+            elevator.new ChangeState(ElevatorState.L2, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L2, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L2))));
         l3.onTrue(new ParallelCommandGroup(
-            elevator.new ChangeState(ElevatorState.L3, true),
+            elevator.new ChangeState(ElevatorState.L3, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L3))));
         l4.onTrue(new ParallelCommandGroup(
-            elevator.new ChangeState(ElevatorState.L4, true),
+            elevator.new ChangeState(ElevatorState.L4, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L4))));
         raiseElevator.onTrue(new InstantCommand(() -> elevator.goToFutureState()));
@@ -229,14 +231,18 @@ public class RobotContainer {
         secondaryStick.button(13).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true));
 
         zeroELevator.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
+
+        secondaryStick.button(15).whileTrue(deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.FORWARD));
+        secondaryStick.button(14).whileTrue(deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD));
     }
 
     public Command getAutonomousCommand() {
+        drivetrain.resetPose(new Pose2d());
         /* Run the routine selected from the auto chooser */
         //return autoChooser.selectedCommand();
-        //return autoRoutines.getRoutine().cmd();
-        drivetrain.resetPose(new Pose2d());
-        Trajectory traj = TrajectoryGenerator.generateTrajectory(new Pose2d(), new ArrayList<Translation2d>(), new Pose2d(1, 0, new Rotation2d()), new TrajectoryConfig(1, 1));
-        return new TrajSwerve(drivetrain, traj);
+        return autoRoutines.getRoutine().cmd();
+
+        //Trajectory traj = TrajectoryGenerator.generateTrajectory(new Pose2d(), new ArrayList<Translation2d>(), new Pose2d(1, 0, new Rotation2d()), new TrajectoryConfig(1, 1));
+        //return new TrajSwerve(drivetrain, traj);
     }
 }

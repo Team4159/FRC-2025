@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
@@ -51,10 +52,12 @@ public class CoralManipulatorPivot extends SubsystemBase{
 
     @Override
     public void periodic(){
-        Constants.CoralManipulator.anglePID.setGoal(targetPosition);
-        double pid = Constants.CoralManipulator.anglePID.calculate(getAngle());
-        double ff = Constants.CoralManipulator.angleFF.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
-        angleMotor.setVoltage(ff + pid);
+        if(DriverStation.isEnabled()){
+            Constants.CoralManipulator.anglePID.setGoal(targetPosition);
+            double pid = Constants.CoralManipulator.anglePID.calculate(getAngle());
+            double ff = Constants.CoralManipulator.angleFF.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+            angleMotor.setVoltage(ff + pid);
+        }
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
         SmartDashboard.putNumber("armposition", Units.radiansToDegrees(getAngle()));
     }
@@ -125,7 +128,8 @@ public class CoralManipulatorPivot extends SubsystemBase{
 
         @Override
         public boolean isFinished(){
-            return !continuous && MathUtil.isNear(Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()), targetPosition, Constants.CoralManipulator.angleTolerance);
+            System.out.println("coralmanip: " + MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance));
+            return !continuous && MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
         }
     }
 }
