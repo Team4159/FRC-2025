@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import org.opencv.features2d.FlannBasedMatcher;
 
+import com.ctre.phoenix6.Utils;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -64,11 +66,13 @@ public class Vision extends SubsystemBase{
         double[] visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
         visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
         double area = limelight.getEntry("ta").getDouble(0.25);
-        // drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.7, 1 - area * 0.7, Double.MAX_VALUE));
-        // drivetrain.addVisionMeasurement(visionPose, Units.millisecondsToSeconds(
-        //     limelight.getEntry("cl").getDouble(0) +
-        //     limelight.getEntry("tl").getDouble(0)
-        // ));
+        if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0)) && area > 0.05 && area < 0.25){
+            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.1, 1 - area * 0.1, Double.MAX_VALUE));
+            drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
+                limelight.getEntry("cl").getDouble(0) +
+                limelight.getEntry("tl").getDouble(0)
+        ));
+        }
         visionField.setRobotPose(visionPose);
     }
     public void forceVision(){

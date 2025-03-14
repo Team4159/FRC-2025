@@ -363,7 +363,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void stopSwerve(){
-        //setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
+        setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
         System.out.println("stopping");
     }
 
@@ -373,7 +373,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             reefTranslation = new Translation2d(Constants.Field.fieldLength/2 - Constants.Field.reefDistFromCenter, Constants.Field.fieldWidth/2);
         else
             reefTranslation = new Translation2d(Constants.Field.fieldLength/2 + Constants.Field.reefDistFromCenter, Constants.Field.fieldWidth/2);
-        Pose2d processor = Constants.Field.processors.get(DriverStation.getAlliance().orElse(Alliance.Blue));
         if(getState().Pose.getTranslation().getDistance(reefTranslation) < Constants.Swerve.maxReefAutoAlignDistatnce){
         //if(getOculusPose().getTranslation().getDistance(reefTranslation) < Constants.Swerve.maxReefAutoAlignDistatnce){
             var reefPoses = Constants.Field.reef.get(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
@@ -393,15 +392,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 closestAutoAlignPose = p2;
                 secondClosestAutoAlignPose = p1;
             }
-        }
-        else if(getState().Pose.getTranslation().getDistance(processor.getTranslation()) < Constants.Swerve.maxReefAutoAlignDistatnce){
-        //else if(getOculusPose().getTranslation().getDistance(processor.getTranslation()) < Constants.Swerve.maxReefAutoAlignDistatnce){
-            closestAutoAlignPose = processor;
-        }
-        else{
-            var reefPoses = Constants.Field.stations.get(DriverStation.getAlliance().orElse(Alliance.Blue));
-            closestAutoAlignPose = getState().Pose.nearest(reefPoses);
-            //closestAutoAlignPose = getOculusPose().nearest(reefPoses);
         }
     }
 

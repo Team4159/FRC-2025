@@ -28,16 +28,20 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ElevatorArmSimulation;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LED.LEDState;
 import frc.robot.subsystems.Deepclimb;
 //import frc.robot.subsystems.ElevatorArmSimulation;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
@@ -82,7 +86,9 @@ public class RobotContainer {
     //triggers
     private final Trigger outtake = secondaryStick.button(1).or(joystick.L2());
     private final Trigger intake = secondaryStick.button(2).or(joystick.R2());
-    private final Trigger l1 = secondaryStick.button(8).or(joystick.cross());
+    //private final Trigger l1 = secondaryStick.button(8).or(joystick.cross());
+    private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
+    private final Trigger AlgaeRemoval = secondaryStick.button(9);
     private final Trigger l2 = secondaryStick.button(5).or(joystick.square());
     private final Trigger l3 = secondaryStick.button(6).or(joystick.circle());
     private final Trigger l4 = secondaryStick.button(7).or(joystick.triangle());
@@ -99,6 +105,7 @@ public class RobotContainer {
     private final CoralManipulatorRoller coralManipulatorRoller = new CoralManipulatorRoller();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Deepclimb deepclimb = new Deepclimb();
+    private final LED led = new LED();
 
     //simulation
     private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, coralManipulatorPivot);
@@ -172,10 +179,11 @@ public class RobotContainer {
         // driveStick.pov(90).whileTrue(new ManualDSAlign(drivetrain, -0.15));
         // driveStick.pov(270).whileTrue(new ManualDSAlign(drivetrain, 0.15));
 
-        driveStick.button(5).whileTrue(new AutoAlign(drivetrain));
-        driveStick.button(6).whileTrue(new AutoAlign(drivetrain, false, true));
+        driveStick.button(11).whileTrue(new AutoAlign(drivetrain));
+        driveStick.button(12).whileTrue(new AutoAlign(drivetrain, false, true));
+        driveStick.button(13).whileTrue(new InstantCommand(() -> vision.forceVision()));
         //driveStick.button(6).whileTrue(new AutoAlign(drivetrain, true));
-        driveStick.button(3).onTrue(new InstantCommand(() -> vision.forceVision()));
+        //driveStick.button(3).onTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
         //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
         driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));
@@ -205,35 +213,62 @@ public class RobotContainer {
         outtake.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
         //intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
         intake.onTrue(new ParallelCommandGroup(
+            led.new ChromaLED((double i) -> Color.fromHSV((int)Math.floor(i * 180), 255, 255)).repeatedly(),
             elevator.new ChangeState(ElevatorState.INTAKE, true),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.INTAKE, false),
             coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
-        l1.onTrue(new ParallelCommandGroup(
-            elevator.new ChangeState(ElevatorState.L1, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.TROUGH, false)));
-            //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L1))));
         l2.onTrue(new ParallelCommandGroup(
+            led.new LightLED(0, 255, 0),
             elevator.new ChangeState(ElevatorState.L2, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L2, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L2))));
         l3.onTrue(new ParallelCommandGroup(
+            led.new LightLED(0, 0, 255),
             elevator.new ChangeState(ElevatorState.L3, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L3))));
         l4.onTrue(new ParallelCommandGroup(
+            led.new LightLED(70, 0, 100),
             elevator.new ChangeState(ElevatorState.L4, false),
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false)));
             //new InstantCommand(() -> elevator.setFutureState(ElevatorState.L4))));
+        AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
+            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false),
+            elevator.new ChangeState(ElevatorState.L3, false),
+            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)));
+        AlgaeRemoval.onTrue(new ParallelCommandGroup(
+            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, false),
+            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)));
         raiseElevator.onTrue(new InstantCommand(() -> elevator.goToFutureState()));
 
-        secondaryStick.button(12).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE));
-        secondaryStick.button(13).whileTrue(algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true));
+        secondaryStick.button(12).whileTrue(
+            new ParallelCommandGroup(
+                led.new LightLED(50, 210, 200),
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE)));
+        secondaryStick.button(13).whileTrue(
+            new ParallelCommandGroup(
+                led.new LightLED(50, 210, 200),
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true)));
 
         zeroELevator.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
 
-        secondaryStick.button(15).whileTrue(deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.FORWARD));
-        secondaryStick.button(14).whileTrue(deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD));
+        secondaryStick.button(15).whileTrue(
+            new ParallelCommandGroup(
+                led.new LightLED(255, 0, 0),
+                deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.FORWARD)));
+        secondaryStick.button(14).whileTrue(
+            new ParallelCommandGroup(
+                led.new LightLED(255, 0, 0),
+                deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD)));
+
+        // led.bindButton(intake, LEDState.RAINBOW);
+        // led.bindButton(secondaryStick.button(12).or(secondaryStick.button(13)), LEDState.TURQUOISE);
+        // led.bindButton(l4, LEDState.PURPLE);
+        // led.bindButton(l3, LEDState.BLUE);
+        // led.bindButton(l2, LEDState.GREEN);
+        // led.bindButton(l1, LEDState.WHITE);
+        // led.bindButton(secondaryStick.button(15).or(secondaryStick.button(14)), LEDState.RED);
     }
 
     public Command getAutonomousCommand() {

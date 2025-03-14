@@ -24,7 +24,7 @@ public class Constants {
         //bumpers included
         /** Units: meters */
         public static final double width = Units.inchesToMeters(33);
-        public static final double distFromReefBase = Units.inchesToMeters(3.5);
+        public static final double distFromReefBase = Units.inchesToMeters(4);
         /** Units: meters */
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
@@ -145,6 +145,7 @@ public class Constants {
         public static enum CoralManipulatorPivotState{
             STOW(0),
             INTAKE(Units.degreesToRadians(0)),
+            ALGAEREMOVAL(Units.degreesToRadians(150)),
             TROUGH(Units.degreesToRadians(200)),
             L2(Units.degreesToRadians(200)),
             L3(Units.degreesToRadians(190)),
