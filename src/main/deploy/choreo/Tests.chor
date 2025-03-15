@@ -3,12 +3,27 @@
  "version":1,
  "type":"Swerve",
  "variables":{
-  "expressions":{},
+  "expressions":{
+   "bumperthickness":{
+    "dimension":"Length",
+    "var":{
+     "exp":"3.5 in",
+     "val":0.08889999999999999
+    }
+   },
+   "offset":{
+    "dimension":"Length",
+    "var":{
+     "exp":"2 in",
+     "val":0.0508
+    }
+   }
+  },
   "poses":{
    "ML":{
     "x":{
-     "exp":"7.14 m",
-     "val":7.14
+     "exp":"7.14 m + bumperthickness",
+     "val":7.228899999999999
     },
     "y":{
      "exp":"7.62 m",
@@ -21,8 +36,8 @@
    },
    "MM":{
     "x":{
-     "exp":"7.14 m",
-     "val":7.14
+     "exp":"7.14 m + bumperthickness",
+     "val":7.228899999999999
     },
     "y":{
      "exp":"4.026 m",
@@ -35,8 +50,8 @@
    },
    "MR":{
     "x":{
-     "exp":"7.14 m",
-     "val":7.14
+     "exp":"7.14 m + bumperthickness",
+     "val":7.228899999999999
     },
     "y":{
      "exp":"0.42 m",
@@ -49,22 +64,22 @@
    },
    "RA":{
     "x":{
-     "exp":"3.14 m",
-     "val":3.14
+     "exp":"3.218 m - offset",
+     "val":3.1672
     },
     "y":{
      "exp":"4.19 m",
      "val":4.19
     },
     "heading":{
-     "exp":"0 rad",
+     "exp":"0 deg",
      "val":0.0
     }
    },
    "RB":{
     "x":{
-     "exp":"3.14 m",
-     "val":3.14
+     "exp":"3.218 m - offset",
+     "val":3.1672
     },
     "y":{
      "exp":"3.86 m",
@@ -77,12 +92,12 @@
    },
    "RC":{
     "x":{
-     "exp":"3.646 m",
-     "val":3.646
+     "exp":"3.71 m - offset * cos(60 deg)",
+     "val":3.6846
     },
     "y":{
-     "exp":"2.9 m",
-     "val":2.9
+     "exp":"3.007 m - offset * sin(60 deg)",
+     "val":2.9630059094877508
     },
     "heading":{
      "exp":"60 deg",
@@ -91,12 +106,12 @@
    },
    "RD":{
     "x":{
-     "exp":"3.931 m",
-     "val":3.931
+     "exp":"3.996 m - offset * cos(60 deg)",
+     "val":3.9706
     },
     "y":{
-     "exp":"2.735 m",
-     "val":2.735
+     "exp":"2.842 m - offset * sin(60 deg)",
+     "val":2.7980059094877507
     },
     "heading":{
      "exp":"60 deg",
@@ -105,12 +120,12 @@
    },
    "RE":{
     "x":{
-     "exp":"5.05 m",
-     "val":5.05
+     "exp":"4.981 m + offset * cos(60 deg)",
+     "val":5.0064
     },
     "y":{
-     "exp":"2.735 m",
-     "val":2.735
+     "exp":"2.842 m - offset * sin(60 deg)",
+     "val":2.7980059094877507
     },
     "heading":{
      "exp":"120 deg",
@@ -119,12 +134,12 @@
    },
    "RF":{
     "x":{
-     "exp":"5.334 m",
-     "val":5.334
+     "exp":"5.267 m + offset * cos(60 deg)",
+     "val":5.292400000000001
     },
     "y":{
-     "exp":"2.9 m",
-     "val":2.9
+     "exp":"3.007 m - offset * sin(60 deg)",
+     "val":2.9630059094877508
     },
     "heading":{
      "exp":"120 deg",
@@ -133,8 +148,8 @@
    },
    "RG":{
     "x":{
-     "exp":"5.92 m",
-     "val":5.92
+     "exp":"5.76 m + offset",
+     "val":5.8107999999999995
     },
     "y":{
      "exp":"3.86 m",
@@ -147,8 +162,8 @@
    },
    "RH":{
     "x":{
-     "exp":"5.92 m",
-     "val":5.92
+     "exp":"5.76 m + offset",
+     "val":5.8107999999999995
     },
     "y":{
      "exp":"4.19 m",
@@ -161,12 +176,12 @@
    },
    "RI":{
     "x":{
-     "exp":"5.334 m",
-     "val":5.334
+     "exp":"5.268 m + offset * cos(60 deg)",
+     "val":5.2934
     },
     "y":{
-     "exp":"5.155 m",
-     "val":5.155
+     "exp":"5.045 m + offset * cos(30 deg)",
+     "val":5.08899409051225
     },
     "heading":{
      "exp":"240 deg",
@@ -175,12 +190,12 @@
    },
    "RJ":{
     "x":{
-     "exp":"5.05 m",
-     "val":5.05
+     "exp":"4.981 m + offset * cos(60 deg)",
+     "val":5.0064
     },
     "y":{
-     "exp":"5.32 m",
-     "val":5.32
+     "exp":"5.209 m + offset * sin(60 deg)",
+     "val":5.252994090512249
     },
     "heading":{
      "exp":"240 deg",
@@ -189,12 +204,12 @@
    },
    "RK":{
     "x":{
-     "exp":"3.931 m",
-     "val":3.931
+     "exp":"3.996 m - offset * cos(60 deg)",
+     "val":3.9706
     },
     "y":{
-     "exp":"5.32 m",
-     "val":5.32
+     "exp":"5.209 m + offset * sin(60 deg)",
+     "val":5.252994090512249
     },
     "heading":{
      "exp":"300 deg",
@@ -203,12 +218,12 @@
    },
    "RL":{
     "x":{
-     "exp":"3.646 m",
-     "val":3.646
+     "exp":"3.71 m - offset * cos(60 deg)",
+     "val":3.6846
     },
     "y":{
-     "exp":"5.155 m",
-     "val":5.155
+     "exp":"5.045 m + offset * sin(60 deg)",
+     "val":5.08899409051225
     },
     "heading":{
      "exp":"300 deg",

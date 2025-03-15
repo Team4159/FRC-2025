@@ -87,11 +87,11 @@ public class Constants {
         
         public static final ElevatorFeedforward elevatorFF = new ElevatorFeedforward(kS, kG, kV, kA);
 
-        public static final double kP = 40;
-        public static final double kI = 6;
+        public static final double kP = 80;
+        public static final double kI = 12;
         public static final double kD = 0;
-        public static final double maxVelocity = 3;
-        public static final double maxAcceleration = 3;
+        public static final double maxVelocity = 10;
+        public static final double maxAcceleration = 10;
 
         //public static final TrapezoidProfile.Constraints trapezoidProfileConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
         public static final TrapezoidProfile.Constraints PIDConstraints = new Constraints(maxVelocity, maxAcceleration);
@@ -161,7 +161,8 @@ public class Constants {
         public static enum CoralManipulatorRollerState{
             PASSIVE(0.05),
             INTAKE(1),
-            OUTTAKE(-1);
+            OUTTAKE(-1),
+            OUTTAKETROUGH(-0.2);
 
             public double spin;
             private CoralManipulatorRollerState(double spin){
@@ -183,8 +184,8 @@ public class Constants {
 
         public static enum AlgaeIntakeState {
             STOW(1.85, 0),
-            INTAKE(0.5, -1),
-            OUTTAKE(0.7, 1);
+            INTAKE(0.5, 1),
+            OUTTAKE(0.7, -1);
             public final double speed;
             public final double angle;
             private AlgaeIntakeState(double a, double s) {

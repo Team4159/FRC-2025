@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
@@ -24,7 +25,7 @@ public class Vision extends SubsystemBase{
     NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
     Pose2d visionPose;
     CommandSwerveDrivetrain drivetrain;
-    boolean doRejectUpdate;
+    boolean doRejectUpdate, mt1rotation;
     ShuffleboardTab visionTab;
     Field2d visionField;
 
@@ -32,7 +33,9 @@ public class Vision extends SubsystemBase{
         this.drivetrain = drivetrain;
         visionTab = Shuffleboard.getTab("Vision");
         visionField = new Field2d();
+        mt1rotation = false;
         Shuffleboard.getTab("Vision").add("visionPose", visionField);
+        Shuffleboard.getTab("Vision").add("Megatag Yaw", mt1rotation);
     }
 
     @Override
@@ -57,22 +60,30 @@ public class Vision extends SubsystemBase{
         // Rotation2d robotRotation = drivetrain.getState().Pose.getRotation();
         // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red))
         //     robotRotation = robotRotation.plus(new Rotation2d(Math.PI));
+        mt1rotation = SmartDashboard.getBoolean("Megatag Yaw", false);
+        var rotation = new Rotation2d();
+        if(mt1rotation && limelight.getEntry("botpose_wpiblue").exists()){
+            rotation = new Rotation2d(limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6])[5]);
+        }
+        else{
+            rotation = drivetrain.getState().Pose.getRotation();
+        }
 
-        LimelightHelpers.SetRobotOrientation("limelight", drivetrain.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation("limelight", rotation.getDegrees(), 0, 0, 0, 0, 0);
         if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
             visionPose = null;
             return;
         }
         double[] visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
         visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
-        double area = limelight.getEntry("ta").getDouble(0.25);
-        if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0)) && area > 0.05 && area < 0.25){
-            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.1, 1 - area * 0.1, Double.MAX_VALUE));
-            drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
-                limelight.getEntry("cl").getDouble(0) +
-                limelight.getEntry("tl").getDouble(0)
-        ));
-        }
+        // double area = limelight.getEntry("ta").getDouble(0.25);
+        // if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0)) && area > 0.05 && area < 0.25){
+        //     drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.1, 1 - area * 0.1, Double.MAX_VALUE));
+        //     drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
+        //         limelight.getEntry("cl").getDouble(0) +
+        //         limelight.getEntry("tl").getDouble(0)
+        // ));
+        // }
         visionField.setRobotPose(visionPose);
     }
     public void forceVision(){

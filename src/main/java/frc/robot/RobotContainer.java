@@ -95,6 +95,8 @@ public class RobotContainer {
     private final Trigger raiseElevator = secondaryStick.button(3).or(joystick.L1());
     private final Trigger forceVision = driveStick.button(3);
 
+    private final Trigger outtakeTrough = secondaryStick.button(10);
+
     private final Trigger zeroELevator = secondaryStick.button(16);
 
     //subsystems
@@ -170,14 +172,10 @@ public class RobotContainer {
         //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
         // );
 
-        // driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0.15, 0));
-        // driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, -0.15));
-        // driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(secondaryStick, -0.15, 0));
-        // driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, 0.15));
-
-        // driveStick.pov(0).or(driveStick.pov(180)).whileTrue(new ManualDSAlign(drivetrain, 0));
-        // driveStick.pov(90).whileTrue(new ManualDSAlign(drivetrain, -0.15));
-        // driveStick.pov(270).whileTrue(new ManualDSAlign(drivetrain, 0.15));
+        driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0.15, 0));
+        driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, -0.15));
+        driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(secondaryStick, -0.15, 0));
+        driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, 0.15));
 
         driveStick.button(11).whileTrue(new AutoAlign(drivetrain));
         driveStick.button(12).whileTrue(new AutoAlign(drivetrain, false, true));
@@ -211,6 +209,7 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         outtake.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
+        outtakeTrough.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
         //intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
         intake.onTrue(new ParallelCommandGroup(
             led.new ChromaLED((double i) -> Color.fromHSV((int)Math.floor(i * 180), 255, 255)).repeatedly(),
