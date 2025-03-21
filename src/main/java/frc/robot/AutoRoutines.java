@@ -88,7 +88,7 @@ public class AutoRoutines extends SubsystemBase{
                 starttoR1.resetOdometry()
                 .andThen(
                     new ParallelCommandGroup(
-                        coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false),
+                        coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false),
                         elevator.new ChangeState(ElevatorState.L4, false),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
                 .andThen(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator, true))
@@ -96,7 +96,7 @@ public class AutoRoutines extends SubsystemBase{
                 .andThen(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, led))
                 .andThen(
                     new ParallelCommandGroup(
-                        coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false),
+                        coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false),
                         elevator.new ChangeState(ElevatorState.L4, false),
                         new SequentialCommandGroup(S1toR2.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
                 .andThen(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator, true, true))
@@ -105,7 +105,7 @@ public class AutoRoutines extends SubsystemBase{
                 // .andThen(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, led))
                 // .andThen(
                 //     new ParallelCommandGroup(
-                //         //coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false),
+                //         //coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false),
                 //         //elevator.new ChangeState(ElevatorState.L4, false),
                 //         new SequentialCommandGroup(S2toR3.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
                 // .andThen(new InstantCommand(() -> swerve.stopSwerve()))
@@ -120,7 +120,7 @@ public class AutoRoutines extends SubsystemBase{
                 starttoR1.resetOdometry()
                 .andThen(
                     new ParallelCommandGroup(
-                        coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false),
+                        coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false),
                         elevator.new ChangeState(ElevatorState.L4, false),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
                 .andThen(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator, true))

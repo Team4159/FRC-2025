@@ -44,9 +44,6 @@ public class AutoOuttake extends Command{
         }
         coralManipulatorRoller.setGoalState(CoralManipulatorRollerState.OUTTAKE);
         backupTimeOffset = Timer.getFPGATimestamp();
-        // if(coralManipulatorPivot.isL4()){
-        //     coralManipulatorPivot.setGoalState(CoralManipulatorPivotState.L4FINAL);
-        // }
     }
 
     @Override

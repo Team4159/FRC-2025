@@ -20,7 +20,6 @@ import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 public class CoralManipulatorPivot extends SubsystemBase{
     private SparkFlex angleMotor;
     private double targetPosition;
-    private boolean isL4;
     private BooleanSupplier hasCoralSupplier;
 
     //simulation
@@ -44,7 +43,6 @@ public class CoralManipulatorPivot extends SubsystemBase{
         // motorSim = new SparkFlexSim(angleMotor, gearbox);
         // encoderSim = motorSim.getAbsoluteEncoderSim();
         targetPosition = Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE.angle;
-        isL4 = false;
         this.hasCoralSupplier = hasCoralSupplier;
     }
 
@@ -105,16 +103,6 @@ public class CoralManipulatorPivot extends SubsystemBase{
     public void setGoalState(CoralManipulatorPivotState desiredState){
         targetPosition = desiredState.angle;
         Constants.CoralManipulator.anglePID.reset(getAngle());
-        if(desiredState.equals(CoralManipulatorPivotState.L4SETUP)){
-            isL4 = true;
-        }
-        else{
-            isL4 = false;
-        }
-    }
-
-    public boolean isL4(){
-        return isL4;
     }
 
     public class ChangeState extends Command{

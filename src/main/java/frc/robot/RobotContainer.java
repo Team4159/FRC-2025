@@ -192,7 +192,7 @@ public class RobotContainer {
         l4.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
             elevator.new ChangeState(ElevatorState.L4, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4SETUP, false)));
+            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false)));
         AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false),
             elevator.new ChangeState(ElevatorState.L3, false),

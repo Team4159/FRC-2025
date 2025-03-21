@@ -162,8 +162,7 @@ public class Constants {
             TROUGH(Units.degreesToRadians(200)),
             L2(Units.degreesToRadians(200)),
             L3(Units.degreesToRadians(190)),
-            L4SETUP(Units.degreesToRadians(196)),
-            L4FINAL(Units.degreesToRadians(196));
+            L4(Units.degreesToRadians(196));
 
             public double angle;
             private CoralManipulatorPivotState(double angle){
