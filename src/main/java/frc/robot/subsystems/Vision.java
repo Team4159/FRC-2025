@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import org.opencv.features2d.FlannBasedMatcher;
-
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.VecBuilder;
@@ -11,13 +9,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
@@ -57,33 +51,59 @@ public class Vision extends SubsystemBase{
         //     visionField.setRobotPose(mt2.pose);
         //     Shuffleboard.getTab("Vision").add("Vision Pose", visionField);
         // }
-        // Rotation2d robotRotation = drivetrain.getState().Pose.getRotation();
+        Rotation2d robotRotation = drivetrain.getState().Pose.getRotation();
         // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red))
         //     robotRotation = robotRotation.plus(new Rotation2d(Math.PI));
-        mt1rotation = SmartDashboard.getBoolean("Megatag Yaw", false);
-        var rotation = new Rotation2d();
-        if(mt1rotation && limelight.getEntry("botpose_wpiblue").exists()){
-            rotation = new Rotation2d(limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6])[5]);
+        // mt1rotation = SmartDashboard.getBoolean("Megatag Yaw", false);
+        // var rotation = new Rotation2d();
+        // if(mt1rotation && limelight.getEntry("botpose_wpiblue").exists()){
+        //     rotation = new Rotation2d(limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6])[5]);
+        // }
+        // else{
+        //     rotation = drivetrain.getState().Pose.getRotation();
+        // }
+        LimelightHelpers.SetRobotOrientation("limelight", robotRotation.getDegrees(), 0, 0, 0, 0, 0);
+        double[] visionData;
+        double[] visionStddevs;
+        double area = limelight.getEntry("ta").getDouble(0);
+        //if nearby use mt1 instead of mt2
+        if(area >= 1){
+            //System.out.println("mt1");
+            if(!limelight.getEntry("botpose_wpiblue").exists()){
+                visionPose = new Pose2d();
+                return;
+            }
+            visionData = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
+            visionPose = new Pose2d(visionData[0], visionData[1], new Rotation2d(Units.degreesToRadians(visionData[5])));
+            visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
+            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[0], visionStddevs[1], visionStddevs[5]));
+        }
+        else if(area >= 0.6){
+            //System.out.println("mt2");
+            if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
+                visionPose = new Pose2d();
+                return;
+            }
+            visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
+            visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
+            visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
+            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[6], visionStddevs[7], visionStddevs[11]));
         }
         else{
-            rotation = drivetrain.getState().Pose.getRotation();
-        }
-
-        LimelightHelpers.SetRobotOrientation("limelight", rotation.getDegrees(), 0, 0, 0, 0, 0);
-        if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
-            visionPose = null;
+            visionPose = new Pose2d();
             return;
         }
-        double[] visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
-        visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
-        // double area = limelight.getEntry("ta").getDouble(0.25);
-        // if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0)) && area > 0.05 && area < 0.25){
-        //     drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.1, 1 - area * 0.1, Double.MAX_VALUE));
-        //     drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
-        //         limelight.getEntry("cl").getDouble(0) +
-        //         limelight.getEntry("tl").getDouble(0)
-        // ));
-        // }
+
+        //LimelightHelpers.SetRobotOrientation("limelight", robotRotation.getDegrees(), 0, 0, 0, 0, 0);
+        
+        if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0))){
+            //old area method of setting stddevs, use if limelight stddevs are inaccurate
+            //drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.1, 1 - area * 0.1, 1-area * 0.05));
+            drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
+                limelight.getEntry("cl").getDouble(0) +
+                limelight.getEntry("tl").getDouble(0)
+        ));
+        }
         visionField.setRobotPose(visionPose);
     }
     public void forceVision(){

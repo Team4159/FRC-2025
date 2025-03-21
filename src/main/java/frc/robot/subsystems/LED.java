@@ -1,11 +1,24 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.FrequencyUnit;
+import edu.wpi.first.units.TimeUnit;
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.util.datalog.RawLogEntry;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,6 +29,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class LED extends SubsystemBase {
+
+    private LEDPattern pattern;
     public enum LEDState {
         WHITE, BLACK, 
         RED, GREEN, BLUE, 
@@ -46,6 +61,7 @@ public class LED extends SubsystemBase {
         strip.setLength(buffer.getLength());
         activeStateList = new ArrayList<LEDState>();
         state = LEDState.BLACK;
+        light(Color.kBlack);
         startLED();
     }
 
@@ -94,6 +110,25 @@ public class LED extends SubsystemBase {
         }
         strip.setData(buffer);
     }
+
+    public void light(Color color){
+        pattern = LEDPattern.solid(color);
+    }
+
+    public void blink(Color color){
+        pattern = LEDPattern.solid(color).blink(Seconds.of(0.5), Seconds.of(0.5));
+    }
+
+    public void rainbow(){
+        pattern = LEDPattern.rainbow(255, 128).scrollAtRelativeSpeed(Hertz.of(1));
+    }
+
+    @Override
+    public void periodic(){
+        pattern.applyTo(buffer);
+        strip.setData(buffer);
+    }
+
     public class LightLED extends Command{
         private int r, g, b;
 
@@ -110,14 +145,62 @@ public class LED extends SubsystemBase {
         }
     }
 
-    public class BlinkLED extends SequentialCommandGroup {
-        private BlinkLED(LED led){
-            super(
-                new InstantCommand(() -> led.stopLED()),
-                new WaitCommand(0.5d),
-                new InstantCommand(() -> led.startLED()),
-                new WaitCommand(0.5d)
-            );
+    public class BlinkLED extends Command {
+        private int prevr, prevg, prevb;
+        private int r, g, b;
+        private BooleanSupplier finisher;
+        private boolean timeout;
+        private Timer timer;
+        public BlinkLED(int r, int g, int b, BooleanSupplier finisher){
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.finisher = finisher;
+            timer = new Timer();
+            addRequirements(LED.this);
+            //LED.this.setLED(r, g, b);
+            // addCommands(
+            //     new InstantCommand(() -> LED.this.stopLED()),
+            //     new WaitCommand(0.5d),
+            //     new InstantCommand(() -> LED.this.startLED()),
+            //     new WaitCommand(0.5d),
+            //     new InstantCommand(() -> LED.this.stopLED()),
+            //     new WaitCommand(0.5d),
+            //     new InstantCommand(() -> LED.this.startLED()),
+            //     new InstantCommand(() -> LED.this.setLED(prevr, prevg, prevb))
+            // );
+        }
+
+        public BlinkLED(int r, int g, int b, boolean timeout){
+            this(r, g, b, () -> false);
+            this.timeout = timeout;
+        }
+        @Override
+        public void initialize(){
+            prevr = LED.this.buffer.getRed(0);
+            prevg = LED.this.buffer.getGreen(0);
+            prevb = LED.this.buffer.getBlue(0);
+            timer.reset();
+        }
+
+        public void execute(){
+            if(Math.floor(timer.get()*2) % 2 == 0){
+                LED.this.setLED(r, g, b);
+            }
+            else{
+                LED.this.setLED(0, 0, 0);
+            }
+        }
+    
+        @Override
+        public boolean isFinished(){
+            return finisher.getAsBoolean() || (timeout && timer.get() > 2);
+        }
+
+        @Override
+        public void end(boolean interrupted){
+            LED.this.setLED(prevr, prevg, prevb);
+            LED.this.startLED();
         }
     }
 

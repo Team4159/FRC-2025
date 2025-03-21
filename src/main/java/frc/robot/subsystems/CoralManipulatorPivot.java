@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.sim.SparkAbsoluteEncoderSim;
-import com.revrobotics.sim.SparkFlexSim;
+import java.util.function.BooleanSupplier;
+
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -10,10 +10,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,6 +21,7 @@ public class CoralManipulatorPivot extends SubsystemBase{
     private SparkFlex angleMotor;
     private double targetPosition;
     private boolean isL4;
+    private BooleanSupplier hasCoralSupplier;
 
     //simulation
     private DCMotor gearbox = DCMotor.getNeoVortex(1);
@@ -42,12 +39,13 @@ public class CoralManipulatorPivot extends SubsystemBase{
     // private SparkFlexSim motorSim;
     // private SparkAbsoluteEncoderSim encoderSim;
 
-    public CoralManipulatorPivot(){
+    public CoralManipulatorPivot(BooleanSupplier hasCoralSupplier){
         angleMotor = new SparkFlex(Constants.CoralManipulator.angleMotorID, MotorType.kBrushless);
         // motorSim = new SparkFlexSim(angleMotor, gearbox);
         // encoderSim = motorSim.getAbsoluteEncoderSim();
         targetPosition = Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE.angle;
         isL4 = false;
+        this.hasCoralSupplier = hasCoralSupplier;
     }
 
     @Override
@@ -55,7 +53,15 @@ public class CoralManipulatorPivot extends SubsystemBase{
         if(DriverStation.isEnabled()){
             Constants.CoralManipulator.anglePID.setGoal(targetPosition);
             double pid = Constants.CoralManipulator.anglePID.calculate(getAngle());
-            double ff = Constants.CoralManipulator.angleFF.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+            double ff;
+            if(hasCoralSupplier.getAsBoolean()){
+                //if there is a coral it will use the FF for coral
+                ff = Constants.CoralManipulator.angleFFCoral.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+            }
+            else{
+                //otherwise it will use the FF for when the manipulator is empty
+                ff = Constants.CoralManipulator.angleFFEmpty.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+            }
             angleMotor.setVoltage(ff + pid);
         }
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
@@ -128,7 +134,7 @@ public class CoralManipulatorPivot extends SubsystemBase{
 
         @Override
         public boolean isFinished(){
-            System.out.println("coralmanip: " + MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance));
+            //System.out.println("coralmanip: " + MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance));
             return !continuous && MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
         }
     }

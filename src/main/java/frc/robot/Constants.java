@@ -5,6 +5,7 @@ import java.util.Map;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,7 +25,7 @@ public class Constants {
         //bumpers included
         /** Units: meters */
         public static final double width = Units.inchesToMeters(33);
-        public static final double distFromReefBase = Units.inchesToMeters(4);
+        public static final double distFromReefBase = Units.inchesToMeters(2);
         /** Units: meters */
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
@@ -37,6 +38,12 @@ public class Constants {
         public static final ProfiledPIDController rotationController = new ProfiledPIDController(7, 0.1, 0.1, rotationConstraints){{
             enableContinuousInput(-Math.PI, Math.PI);
         }};
+
+        public static final HolonomicDriveController holonomicController= new HolonomicDriveController(
+            new PIDController(2, 0, 0),
+            new PIDController(2, 0, 0),
+            new ProfiledPIDController(5, 0, 0,
+                    new TrapezoidProfile.Constraints(2, 2)));
 
         public static final double maxAccelFullExtension = 2;
         public static final double maxAccelFullRetraction = 3;
@@ -122,12 +129,18 @@ public class Constants {
         public static final double MOI = 0.2466;
         public static final double lengthMeters = 0.405;
 
-        public static final double kS = 0;
-        public static final double kG = 0.2;//0.34;//0.8/12;//1.45/12;//2.45/12;
-        public static final double kV = 1.69/3;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
-        public static final double kA = 0.01;//0.03/12;//0.05/12;//0.15/12;
+        public static final double kSEmpty = 0;
+        public static final double kGEmpty = 0.3;//0.34;//0.8/12;//1.45/12;//2.45/12;
+        public static final double kVEmpty = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
+        public static final double kAEmpty = 0.02;//0.03/12;//0.05/12;//0.15/12;
 
-        public static final ArmFeedforward angleFF = new ArmFeedforward(kS, kG, kV, kA);
+        public static final double kSCoral = 0;
+        public static final double kGCoral = 0.35;//0.34;//0.8/12;//1.45/12;//2.45/12;
+        public static final double kVCoral = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
+        public static final double kACoral = 0.02;//0.03/12;//0.05/12;//0.15/12;
+
+        public static final ArmFeedforward angleFFEmpty = new ArmFeedforward(kSEmpty, kGEmpty, kVEmpty, kAEmpty);
+        public static final ArmFeedforward angleFFCoral = new ArmFeedforward(kSCoral, kGCoral, kVCoral, kACoral);
 
         public static final double kP = 2;
         public static final double kI = 0.05;
@@ -159,7 +172,7 @@ public class Constants {
         }
 
         public static enum CoralManipulatorRollerState{
-            PASSIVE(0.05),
+            PASSIVE(0.02),
             INTAKE(1),
             OUTTAKE(-1),
             OUTTAKETROUGH(-0.2);

@@ -1,18 +1,10 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,36 +13,28 @@ import frc.robot.Constants.Elevator.ElevatorState;
 
 public class Elevator extends SubsystemBase{
     private SparkFlex motor;
-    //the position the elevator is currently trying to get to
-    private double targetPosition;
-    //a planned position that can be stored for future use
-    private double futureTarget;
 
     private boolean zeroMode;
 
-    private DCMotor elevatorGearbox = DCMotor.getNeoVortex(1);
-    private ElevatorSim elevatorSim = new ElevatorSim(
-        elevatorGearbox, 
-        Constants.Elevator.elevatorGearing, 
-        Constants.Elevator.elevatorWeightKG, 
-        Constants.Elevator.spoolDiameter, 
-        0, 
-        Constants.Elevator.maxHeight, 
-        true, 
-        0, 
-        0.001,
-        0);
+    //sim
+    // private DCMotor elevatorGearbox = DCMotor.getNeoVortex(1);
+    // private ElevatorSim elevatorSim = new ElevatorSim(
+    //     elevatorGearbox, 
+    //     Constants.Elevator.elevatorGearing, 
+    //     Constants.Elevator.elevatorWeightKG, 
+    //     Constants.Elevator.spoolDiameter, 
+    //     0, 
+    //     Constants.Elevator.maxHeight, 
+    //     true, 
+    //     0, 
+    //     0.001,
+    //     0);
 
     //private SparkFlexSim motorSim;
 
     public Elevator(){
         motor = new SparkFlex(Constants.Elevator.elevatorMotorID, MotorType.kBrushless);
-        //motorSim = new SparkFlexSim(motor, elevatorGearbox);
-        //setGoalState(ElevatorState.STOW);
-        //zeroMode = true;
         setGoalState(ElevatorState.INTAKE);
-        //setFutureState(ElevatorState.INTAKE);
-        ///goToFutureState();
     }
 
     /** @param position the desired final state of the elevator */
@@ -58,18 +42,6 @@ public class Elevator extends SubsystemBase{
         Constants.Elevator.elevatorPID.reset(getHeight());
         Constants.Elevator.elevatorPID.setGoal(desiredState.height);
         SmartDashboard.putNumber("desiredPosition", desiredState.height);
-    }
-
-    /** @param position the desired final state of the elevator */
-    public void setFutureState(ElevatorState desiredState){
-        SmartDashboard.putString("Elevator Mode", desiredState.name());
-        futureTarget = desiredState.height;
-    }
-    
-    public void goToFutureState(){
-        //targetPosition = futureTarget;
-        Constants.Elevator.elevatorPID.setGoal(futureTarget);
-        SmartDashboard.putNumber("desiredPosition", futureTarget);
     }
 
     @Override
@@ -130,13 +102,13 @@ public class Elevator extends SubsystemBase{
     //         BatterySim.calculateDefaultBatteryLoadedVoltage(elevatorSim.getCurrentDrawAmps()));
     // }
 
-    /** will return 0 if not used during simulation 
-     * @return meters
-    */
-    public double getSimPosition(){
-        if(RobotBase.isReal()) return 0;
-        return elevatorSim.getPositionMeters();
-    }
+    // /** will return 0 if not used during simulation 
+    //  * @return meters
+    // */
+    // public double getSimPosition(){
+    //     if(RobotBase.isReal()) return 0;
+    //     return elevatorSim.getPositionMeters();
+    // }
 
     public class ChangeState extends Command{
         private Constants.Elevator.ElevatorState elevatorState;
@@ -164,7 +136,7 @@ public class Elevator extends SubsystemBase{
         @Override
         public boolean isFinished(){
             //System.out.println("elevator: " + MathUtil.isNear(getHeight(), targetPosition, Constants.Elevator.elevatorTolerance));
-            System.out.println(getHeight() + " " + Constants.Elevator.elevatorPID.getGoal().position);
+            //System.out.println(getHeight() + " " + Constants.Elevator.elevatorPID.getGoal().position);
             return !continuous && MathUtil.isNear(getHeight(), Constants.Elevator.elevatorPID.getGoal().position, Constants.Elevator.elevatorTolerance);
         }
     }

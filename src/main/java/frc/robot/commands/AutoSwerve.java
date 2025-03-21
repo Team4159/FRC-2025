@@ -4,8 +4,6 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,7 +13,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class AutoSwerve extends Command{
     protected CommandSwerveDrivetrain swerve;
-    private SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+    protected SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
     private Supplier<Pose2d> desiredPoseSupplier;
     protected Pose2d desiredPose;
     protected Transform2d transform;

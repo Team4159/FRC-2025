@@ -11,6 +11,20 @@
      "val":0.08889999999999999
     }
    },
+   "coralAccel":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"2 m / s ^ 2",
+     "val":2.0
+    }
+   },
+   "noCoralAccel":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"2 m / s ^ 2",
+     "val":2.0
+    }
+   },
    "offset":{
     "dimension":"Length",
     "var":{
