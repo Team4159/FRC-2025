@@ -68,7 +68,7 @@ public class AutoRoutines extends SubsystemBase{
         final String start = startChooser.getSelected();
         final String s1 = station1Chooser.getSelected();
         //final String s2 = station2Chooser.getSelected();
-        if(start == null || reef1Chooser.getSelected() == null || s1 == null){
+        if(start == null || reef1Chooser.getSelected() == null || s1 == null || reef2Chooser.getSelected() == null){
             System.out.println("null values");
             return routine;
         }
@@ -219,7 +219,7 @@ public class AutoRoutines extends SubsystemBase{
 
         station1Chooser = new SendableChooser<String>();
 
-        //reef2Chooser = new SendableChooser<String>();
+        reef2Chooser = new SendableChooser<String>();
 
         //station2Chooser = new SendableChooser<String>();
 
@@ -229,7 +229,7 @@ public class AutoRoutines extends SubsystemBase{
         SmartDashboard.putData("Start", startChooser);
         SmartDashboard.putData("Reef 1", reef1Chooser);
         SmartDashboard.putData("Station 1", station1Chooser);
-        //SmartDashboard.putData("Reef 2", reef2Chooser);
+        SmartDashboard.putData("Reef 2", reef2Chooser);
         //SmartDashboard.putData("Station 2", station2Chooser);
         //SmartDashboard.putData("Reef 3", reef3Chooser);
     }
