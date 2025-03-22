@@ -12,6 +12,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
@@ -68,6 +69,7 @@ public class Vision extends SubsystemBase{
         double area = limelight.getEntry("ta").getDouble(0);
         //if nearby use mt1 instead of mt2
         if(area >= 1){
+            SmartDashboard.putBoolean("mt1", true);
             //System.out.println("mt1");
             if(!limelight.getEntry("botpose_wpiblue").exists()){
                 visionPose = new Pose2d();
@@ -75,10 +77,11 @@ public class Vision extends SubsystemBase{
             }
             visionData = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
             visionPose = new Pose2d(visionData[0], visionData[1], new Rotation2d(Units.degreesToRadians(visionData[5])));
-            visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
-            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[0], visionStddevs[1], visionStddevs[5]));
+            // visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
+            // drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[0], visionStddevs[1], visionStddevs[5]));
         }
-        else if(area >= 0.6){
+        else if(area >= 0.8){
+            SmartDashboard.putBoolean("mt1", false);
             //System.out.println("mt2");
             if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
                 visionPose = new Pose2d();
@@ -86,10 +89,11 @@ public class Vision extends SubsystemBase{
             }
             visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
             visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
-            visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
-            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[6], visionStddevs[7], visionStddevs[11]));
+            // visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
+            // drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[6], visionStddevs[7], visionStddevs[11]));
         }
         else{
+            SmartDashboard.putBoolean("mt1", false);
             visionPose = new Pose2d();
             return;
         }
@@ -98,7 +102,7 @@ public class Vision extends SubsystemBase{
         
         if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0))){
             //old area method of setting stddevs, use if limelight stddevs are inaccurate
-            //drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.1, 1 - area * 0.1, 1-area * 0.05));
+            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.3, 1 - area * 0.3, 1-area * 0.1));
             drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
                 limelight.getEntry("cl").getDouble(0) +
                 limelight.getEntry("tl").getDouble(0)
