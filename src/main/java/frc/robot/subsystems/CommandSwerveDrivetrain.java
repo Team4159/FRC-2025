@@ -401,7 +401,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         closestPoseF2d.setRobotPose(getState().Pose);
         SmartDashboard.putData("closest reef", closestPoseF2d);
         setMaxAccel();
-        setVisionMeasurementStdDevs(VecBuilder.fill(0, 0, 0));
     }
 
     private void setMaxAccel(){
