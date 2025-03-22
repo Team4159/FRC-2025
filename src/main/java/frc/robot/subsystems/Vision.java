@@ -1,118 +1,81 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.Utils;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
 public class Vision extends SubsystemBase{
-    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
-    Pose2d visionPose;
-    CommandSwerveDrivetrain drivetrain;
-    boolean doRejectUpdate, mt1rotation;
-    ShuffleboardTab visionTab;
-    Field2d visionField;
+    private CommandSwerveDrivetrain drivetrain;
+    private Field2d visionField;
 
     public Vision(CommandSwerveDrivetrain drivetrain){
         this.drivetrain = drivetrain;
-        visionTab = Shuffleboard.getTab("Vision");
         visionField = new Field2d();
-        mt1rotation = false;
         Shuffleboard.getTab("Vision").add("visionPose", visionField);
-        Shuffleboard.getTab("Vision").add("Megatag Yaw", mt1rotation);
     }
 
     @Override
-    public void periodic(){
-        // LimelightHelpers.SetRobotOrientation("limelight", drivetrain.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-        // if(Math.abs(drivetrain.getState().Speeds.omegaRadiansPerSecond) > 720*Math.PI/180) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-        // {
-        //     doRejectUpdate = true;
-        // }
-        // if(mt2.tagCount == 0)
-        // {
-        //     doRejectUpdate = true;
-        // }
-        // if(!doRejectUpdate)
-        // {
-        //     drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
-        //     drivetrain.addVisionMeasurement(mt2.pose, Timer.getFPGATimestamp() - mt2.timestampSeconds);
-        //     visionField.setRobotPose(mt2.pose);
-        //     Shuffleboard.getTab("Vision").add("Vision Pose", visionField);
-        // }
-        Rotation2d robotRotation = drivetrain.getState().Pose.getRotation();
-        // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red))
-        //     robotRotation = robotRotation.plus(new Rotation2d(Math.PI));
-        // mt1rotation = SmartDashboard.getBoolean("Megatag Yaw", false);
-        // var rotation = new Rotation2d();
-        // if(mt1rotation && limelight.getEntry("botpose_wpiblue").exists()){
-        //     rotation = new Rotation2d(limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6])[5]);
-        // }
-        // else{
-        //     rotation = drivetrain.getState().Pose.getRotation();
-        // }
-        LimelightHelpers.SetRobotOrientation("limelight", robotRotation.getDegrees(), 0, 0, 0, 0, 0);
-        double[] visionData;
-        double[] visionStddevs;
-        double area = limelight.getEntry("ta").getDouble(0);
-        //if nearby use mt1 instead of mt2
-        if(area >= 1){
-            SmartDashboard.putBoolean("mt1", true);
-            //System.out.println("mt1");
-            if(!limelight.getEntry("botpose_wpiblue").exists()){
-                visionPose = new Pose2d();
-                return;
+    public void periodic() {
+        visionField.setRobotPose(updateOdometry());
+    }
+    
+    /** Updates the field relative position of the robot. */
+    public Pose2d updateOdometry() {
+        boolean useMegaTag2 = true; //set to false to use MegaTag1
+        boolean doRejectUpdate = false;
+        if(useMegaTag2 == false)
+        {
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        
+        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+        {
+            if(mt1.rawFiducials[0].ambiguity > .7)
+            {
+            doRejectUpdate = true;
             }
-            visionData = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-            visionPose = new Pose2d(visionData[0], visionData[1], new Rotation2d(Units.degreesToRadians(visionData[5])));
-            // visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
-            // drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[0], visionStddevs[1], visionStddevs[5]));
-        }
-        else if(area >= 0.8){
-            SmartDashboard.putBoolean("mt1", false);
-            //System.out.println("mt2");
-            if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
-                visionPose = new Pose2d();
-                return;
+            if(mt1.rawFiducials[0].distToCamera > 3)
+            {
+            doRejectUpdate = true;
             }
-            visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
-            visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
-            // visionStddevs = limelight.getEntry("stddevs").getDoubleArray(new double[12]);
-            // drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(visionStddevs[6], visionStddevs[7], visionStddevs[11]));
         }
-        else{
-            SmartDashboard.putBoolean("mt1", false);
-            visionPose = new Pose2d();
-            return;
+        if(mt1.tagCount == 0)
+        {
+            doRejectUpdate = true;
         }
 
-        //LimelightHelpers.SetRobotOrientation("limelight", robotRotation.getDegrees(), 0, 0, 0, 0, 0);
-        
-        if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0))){
-            //old area method of setting stddevs, use if limelight stddevs are inaccurate
-            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.3, 1 - area * 0.3, 1-area * 0.1));
-            drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
-                limelight.getEntry("cl").getDouble(0) +
-                limelight.getEntry("tl").getDouble(0)
-        ));
+        if(!doRejectUpdate)
+        {
+            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+            drivetrain.addVisionMeasurement(
+                mt1.pose,
+                mt1.timestampSeconds);
+            return mt1.pose;
         }
-        visionField.setRobotPose(visionPose);
-    }
-    public void forceVision(){
-        if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0))){
-            drivetrain.resetPose(visionPose);
         }
+        else if (useMegaTag2 == true)
+        {
+        LimelightHelpers.SetRobotOrientation("limelight", drivetrain.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+        if(Math.abs(drivetrain.getState().Speeds.omegaRadiansPerSecond) > Math.PI * 2) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+        {
+            doRejectUpdate = true;
+        }
+        if(mt2.tagCount == 0)
+        {
+            doRejectUpdate = true;
+        }
+        if(!doRejectUpdate)
+        {
+            drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+            drivetrain.addVisionMeasurement(
+                mt2.pose,
+                mt2.timestampSeconds);
+            return mt2.pose;
+        }
+        }
+        return null;
     }
 }
