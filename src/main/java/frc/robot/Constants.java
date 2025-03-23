@@ -25,7 +25,7 @@ public class Constants {
         //bumpers included
         /** Units: meters */
         public static final double width = Units.inchesToMeters(33);
-        public static final double distFromReefBase = Units.inchesToMeters(2);
+        public static final double distFromReefBase = Units.inchesToMeters(1.5);
         /** Units: meters */
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */

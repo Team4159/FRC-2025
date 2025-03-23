@@ -103,10 +103,9 @@ public class Vision extends SubsystemBase{
         if(visionPose != null && !visionPose.getTranslation().equals(new Translation2d(0, 0))){
             //old area method of setting stddevs, use if limelight stddevs are inaccurate
             drivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(1 - area * 0.3, 1 - area * 0.3, 1-area * 0.1));
-            drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() + Units.millisecondsToSeconds(
+            drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() - Units.millisecondsToSeconds(
                 limelight.getEntry("cl").getDouble(0) +
-                limelight.getEntry("tl").getDouble(0)
-        ));
+                limelight.getEntry("tl").getDouble(0)));
         }
         visionField.setRobotPose(visionPose);
     }

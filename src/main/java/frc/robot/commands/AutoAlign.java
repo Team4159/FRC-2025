@@ -60,12 +60,13 @@ public class AutoAlign extends AutoSwerve{
             //     trajMode = true;
             // }
             // timer.restart();
+            tooFar = false;
             led.blink(Color.kYellow);
+            super.initialize();
         }
         else{
             tooFar = true;
         }
-        super.initialize();
     }
 
     @Override
