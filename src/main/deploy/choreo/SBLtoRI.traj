@@ -18,10 +18,10 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"SBL.x", "val":1.595}, "y":{"exp":"SBL.y", "val":7.436}, "heading":{"exp":"SBL.heading", "val":-0.9403950334420096}, "intervals":24, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"2.263272523880005 m", "val":2.263272523880005}, "y":{"exp":"7.300290107727051 m", "val":7.300290107727051}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":53, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
-    {"x":{"exp":"5.29151725769043 m", "val":5.29151725769043}, "y":{"exp":"5.691534996032715 m", "val":5.691534996032715}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":23, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
-    {"x":{"exp":"RI.x", "val":5.28705}, "y":{"exp":"RI.y", "val":5.077995567884187}, "heading":{"exp":"RI.heading", "val":4.1887902047863905}, "intervals":11, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"SBL.x", "val":1.595}, "y":{"exp":"SBL.y", "val":7.436}, "heading":{"exp":"SBL.heading", "val":-0.9403950334420096}, "intervals":25, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"2.3496384620666504 m", "val":2.3496384620666504}, "y":{"exp":"7.234187126159668 m", "val":7.234187126159668}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":52, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
+    {"x":{"exp":"5.270563125610352 m", "val":5.270563125610352}, "y":{"exp":"5.763511657714844 m", "val":5.763511657714844}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":24, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
+    {"x":{"exp":"RI.x", "val":5.2806999999999995}, "y":{"exp":"RI.y", "val":5.066997045256125}, "heading":{"exp":"RI.heading", "val":4.1887902047863905}, "intervals":11, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},

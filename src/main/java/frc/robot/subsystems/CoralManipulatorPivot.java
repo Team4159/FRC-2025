@@ -61,7 +61,7 @@ public class CoralManipulatorPivot extends SubsystemBase{
                 ff = Constants.CoralManipulator.angleFFEmpty.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
             }
             angleMotor.setVoltage(ff + pid);
-            System.out.println(Constants.CoralManipulator.anglePID.getSetpoint().velocity);
+            //System.out.println(Constants.CoralManipulator.anglePID.getSetpoint().velocity);
         }
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
         SmartDashboard.putNumber("armposition", Units.radiansToDegrees(getAngle()));

@@ -146,7 +146,7 @@ public class Constants {
         public static final double kI = 0;
         public static final double kD = 0.04;
         public static final double maxVelocity = 10;
-        public static final double maxAcceleration = 10;
+        public static final double maxAcceleration = 8;
 
         public static final double FFOffset = Units.rotationsToRadians(-0.1);
 
