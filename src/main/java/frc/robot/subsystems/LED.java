@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.ArrayList;
@@ -9,12 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.FrequencyUnit;
-import edu.wpi.first.units.TimeUnit;
-import edu.wpi.first.units.measure.Frequency;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.util.datalog.RawLogEntry;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -22,10 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class LED extends SubsystemBase {
@@ -48,7 +38,7 @@ public class LED extends SubsystemBase {
         commands.put(LEDState.TURQUOISE, new InstantCommand(() -> setLED(50, 210, 200)));
         commands.put(LEDState.PURPLE, new InstantCommand(() -> setLED(70, 0, 100), this));
         commands.put(LEDState.YELLOW, new InstantCommand(() -> setLED(150, 75, 0), this));
-        commands.put(LEDState.RAINBOW, new ChromaLED((double i) -> Color.fromHSV((int)Math.floor(i * 180), 255, 255)).repeatedly());
+        //commands.put(LEDState.RAINBOW, new ChromaLED((double i) -> Color.fromHSV((int)Math.floor(i * 180), 255, 255)).repeatedly());
     };
     private AddressableLED strip;
     private AddressableLEDBuffer buffer;
@@ -115,8 +105,13 @@ public class LED extends SubsystemBase {
         pattern = LEDPattern.solid(color);
     }
 
+    /** default blink time of 0.5 seconds */
     public void blink(Color color){
-        pattern = LEDPattern.solid(color).blink(Seconds.of(0.5), Seconds.of(0.5));
+        blink(color, 0.5);
+    }
+
+    public void blink(Color color, double blinkTime){
+        pattern = LEDPattern.solid(color).blink(Seconds.of(blinkTime), Seconds.of(blinkTime));
     }
 
     public void rainbow(){
@@ -146,17 +141,21 @@ public class LED extends SubsystemBase {
     }
 
     public class BlinkLED extends Command {
-        private int prevr, prevg, prevb;
-        private int r, g, b;
-        private BooleanSupplier finisher;
-        private boolean timeout;
+        private Color blinkColor;
+        private boolean rainbow;
         private Timer timer;
-        public BlinkLED(int r, int g, int b, BooleanSupplier finisher){
-            this.r = r;
-            this.g = g;
-            this.b = b;
-            this.finisher = finisher;
+        private double blinkTime, onTime;
+        /** @param blinkColor the color that will blink
+         * @param onTime the time that the LED will blink for
+         * @param blinkTime the amount of time the LED will spend in each on and off state
+         * @param rainbow if true the LED will do a rainbow pattern when the time of onTime is reached
+         */
+        public BlinkLED(Color blinkColor, double onTime, double blinkTime, boolean rainbow){
+            this.blinkColor = blinkColor;
+            this.onTime = onTime;
+            this.rainbow = rainbow;
             timer = new Timer();
+            this.blinkTime = blinkTime;
             addRequirements(LED.this);
             //LED.this.setLED(r, g, b);
             // addCommands(
@@ -170,59 +169,47 @@ public class LED extends SubsystemBase {
             //     new InstantCommand(() -> LED.this.setLED(prevr, prevg, prevb))
             // );
         }
-
-        public BlinkLED(int r, int g, int b, boolean timeout){
-            this(r, g, b, () -> false);
-            this.timeout = timeout;
-        }
         @Override
         public void initialize(){
-            prevr = LED.this.buffer.getRed(0);
-            prevg = LED.this.buffer.getGreen(0);
-            prevb = LED.this.buffer.getBlue(0);
-            timer.reset();
+            LED.this.blink(blinkColor, blinkTime);
+            timer.restart();
         }
 
-        public void execute(){
-            if(Math.floor(timer.get()*2) % 2 == 0){
-                LED.this.setLED(r, g, b);
-            }
-            else{
-                LED.this.setLED(0, 0, 0);
-            }
-        }
-    
         @Override
         public boolean isFinished(){
-            return finisher.getAsBoolean() || (timeout && timer.get() > 2);
+            return timer.get() > onTime;
         }
 
         @Override
         public void end(boolean interrupted){
-            LED.this.setLED(prevr, prevg, prevb);
-            LED.this.startLED();
+            if(rainbow){
+                LED.this.rainbow();
+            }
+            else{
+                LED.this.light(blinkColor);
+            }
         }
     }
 
-    public class ChromaLED extends Command {
-        private LEDColorSupplier supplier;
+    // public class ChromaLED extends Command {
+    //     private LEDColorSupplier supplier;
 
-        public ChromaLED(LEDColorSupplier supplier) {
-            this.supplier = supplier;
-            addRequirements(LED.this);
-        }
+    //     public ChromaLED(LEDColorSupplier supplier) {
+    //         this.supplier = supplier;
+    //         addRequirements(LED.this);
+    //     }
 
-        @Override
-        public void execute() {
-            int len = LED.this.buffer.getLength();
-            int offset = (int)Math.floor((System.currentTimeMillis()/10) % len);
-            for (int i = 0; i < len; i++)
-                LED.this.buffer.setLED((i+offset) % len, supplier.get((double)i/len));
-            LED.this.strip.setData(LED.this.buffer);
-        }
+    //     @Override
+    //     public void execute() {
+    //         int len = LED.this.buffer.getLength();
+    //         int offset = (int)Math.floor((System.currentTimeMillis()/10) % len);
+    //         for (int i = 0; i < len; i++)
+    //             LED.this.buffer.setLED((i+offset) % len, supplier.get((double)i/len));
+    //         LED.this.strip.setData(LED.this.buffer);
+    //     }
 
-        public static interface LEDColorSupplier {
-            public Color get(double progress);
-        }
-    }
+    //     public static interface LEDColorSupplier {
+    //         public Color get(double progress);
+    //     }
+    // }
 }

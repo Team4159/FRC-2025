@@ -142,11 +142,11 @@ public class Constants {
         public static final ArmFeedforward angleFFEmpty = new ArmFeedforward(kSEmpty, kGEmpty, kVEmpty, kAEmpty);
         public static final ArmFeedforward angleFFCoral = new ArmFeedforward(kSCoral, kGCoral, kVCoral, kACoral);
 
-        public static final double kP = 2;
-        public static final double kI = 0.05;
-        public static final double kD = 0;
-        public static final double maxVelocity = 7;
-        public static final double maxAcceleration = 7;
+        public static final double kP = 3.5;
+        public static final double kI = 0;
+        public static final double kD = 0.04;
+        public static final double maxVelocity = 10;
+        public static final double maxAcceleration = 10;
 
         public static final double FFOffset = Units.rotationsToRadians(-0.1);
 

@@ -92,6 +92,8 @@ public class RobotContainer {
     private final AutoFactory autoFactory;
     private final AutoRoutines autoRoutines;
 
+    private final Trigger beamBreakLEDTrigger = new Trigger(coralManipulatorRoller :: hasCoral);
+
     public RobotContainer() {
         autoFactory = drivetrain.createAutoFactory();
         autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulatorPivot, coralManipulatorRoller, led);
@@ -181,6 +183,7 @@ public class RobotContainer {
             coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.INTAKE, false),
             coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
+        beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
         l2.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L2, false),
