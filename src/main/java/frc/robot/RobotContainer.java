@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import choreo.auto.AutoFactory;
@@ -20,32 +19,25 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Deepclimb;
+import frc.robot.Constants.CoralManipulator.PivotState;
+import frc.robot.Constants.CoralManipulator.RollerState;
 //import frc.robot.subsystems.ElevatorArmSimulation;
-import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
-import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.commands.AutoAlign;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralManipulatorPivot;
-//import frc.robot.subsystems.CoralManipulatorPivot;
-import frc.robot.subsystems.CoralManipulatorRoller;
+import frc.robot.subsystems.CoralManipulator;
 import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity 0.75 old value
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    // private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
+    //         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -61,31 +53,29 @@ public class RobotContainer {
     private final Trigger outtake = secondaryStick.button(1);//.or(joystick.L2());
     private final Trigger intake = secondaryStick.button(2);//.or(joystick.R2());
     //private final Trigger l1 = secondaryStick.button(8).or(joystick.cross());
-    private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
-    private final Trigger AlgaeRemoval = secondaryStick.button(9);
+    private final Trigger cleanSetup = secondaryStick.button(8);
+    private final Trigger clean = secondaryStick.button(9);
+    private final Trigger l1 = secondaryStick.button(10);
     private final Trigger l2 = secondaryStick.button(5);//.or(joystick.square());
     private final Trigger l3 = secondaryStick.button(6);//.or(joystick.circle());
     private final Trigger l4 = secondaryStick.button(7);//.or(joystick.triangle());
-    private final Trigger forceVision = driveStick.button(13);
     private final Trigger autoAlignLeft = driveStick.button(11);
     private final Trigger autoAlignRight = driveStick.button(12);
 
-    private final Trigger outtakeTrough = secondaryStick.button(10);
 
-    private final Trigger zeroELevator = secondaryStick.button(16);
+    private final Trigger zeroElevator = secondaryStick.button(16);
 
     //subsystems
 
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
-    private final CoralManipulatorRoller coralManipulatorRoller = new CoralManipulatorRoller();
-    private final CoralManipulatorPivot coralManipulatorPivot = new CoralManipulatorPivot(() -> coralManipulatorRoller.hasCoral());
+    private final CoralManipulator coralManipulator = new CoralManipulator();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Deepclimb deepclimb = new Deepclimb();
     private final LED led = new LED();
 
     //simulation
-    //private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, coralManipulatorPivot);
+    //private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, );
     public final Vision vision = new Vision(drivetrain);
 
     /* Path follower */
@@ -94,7 +84,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         autoFactory = drivetrain.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulatorPivot, coralManipulatorRoller, led);
+        autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulator, led);
 
         drivetrain.setElevator(elevator);
 
@@ -118,10 +108,7 @@ public class RobotContainer {
             //         .withVelocityY(-driveStick.getX() * MaxSpeed) // Drive left with negative X (left)
             //         .withRotationalRate(-driveStick.getZ() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             // )
-            //new InstantCommand(() -> drivetrain.drive(-joystick.getLeftY(), -joystick.getLeftX(), -joystick.getRightX()))
             drivetrain.new Drive(driveStick)
-
-            //new InstantCommand(() -> drivetrain.drive(-driveStick.getY(), -driveStick.getX(), -driveStick.getZ))
         );
 
         //PS4 controller
@@ -148,7 +135,6 @@ public class RobotContainer {
 
         autoAlignLeft.whileTrue(new AutoAlign(drivetrain, led, true));
         autoAlignRight.whileTrue(new AutoAlign(drivetrain, led, false));
-        forceVision.whileTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
         //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
         driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));
@@ -172,34 +158,32 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        outtake.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
-        outtakeTrough.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
-        //intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
+        outtake.onTrue(coralManipulator.new ChangeState(null, RollerState.OUTTAKE));
         intake.whileTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.rainbow()),
             elevator.new ChangeState(ElevatorState.INTAKE, true),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.INTAKE, false),
-            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.INTAKE)))
-            .onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
+            coralManipulator.new ChangeState(Constants.CoralManipulator.PivotState.INTAKE, Constants.CoralManipulator.RollerState.INTAKE)));
+        l1.whileTrue(new ParallelCommandGroup(
+            new InstantCommand(() -> led.light(Color.kYellow)),
+            elevator.new ChangeState(ElevatorState.L1, false),
+            coralManipulator.new ChangeState(PivotState.L1)
+        )).onFalse(coralManipulator.new ChangeState(PivotState.L1, RollerState.OUTTAKETROUGH));
         l2.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L2, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L2, false)));
+            coralManipulator.new ChangeState(PivotState.L2)));
         l3.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kBlue)),
             elevator.new ChangeState(ElevatorState.L3, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false)));
+            coralManipulator.new ChangeState(PivotState.L3)));
         l4.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
             elevator.new ChangeState(ElevatorState.L4, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false)));
-        AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false),
-            elevator.new ChangeState(ElevatorState.L3, false),
-            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)));
-        AlgaeRemoval.onTrue(new ParallelCommandGroup(
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, false),
-            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)));
+            coralManipulator.new ChangeState(PivotState.L4)));
+        cleanSetup.onTrue(new ParallelCommandGroup(
+            coralManipulator.new ChangeState(PivotState.L3, RollerState.CLEAN),
+            elevator.new ChangeState(ElevatorState.L3, false)));
+        clean.onTrue(coralManipulator.new ChangeState(PivotState.CLEAN, RollerState.CLEAN));
 
         secondaryStick.button(12).whileTrue(
             new ParallelCommandGroup(
@@ -210,7 +194,7 @@ public class RobotContainer {
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true)));
 
-        zeroELevator.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
+        zeroElevator.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
 
         secondaryStick.button(15).whileTrue(
             new ParallelCommandGroup(
@@ -220,14 +204,6 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new InstantCommand(() -> led.light(Color.kRed)),
                 deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD)));
-
-        // led.bindButton(intake, LEDState.RAINBOW);
-        // led.bindButton(secondaryStick.button(12).or(secondaryStick.button(13)), LEDState.TURQUOISE);
-        // led.bindButton(l4, LEDState.PURPLE);
-        // led.bindButton(l3, LEDState.BLUE);
-        // led.bindButton(l2, LEDState.GREEN);
-        // led.bindButton(l1, LEDState.WHITE);
-        // led.bindButton(secondaryStick.button(15).or(secondaryStick.button(14)), LEDState.RED);
     }
 
     public Command getAutonomousCommand() {

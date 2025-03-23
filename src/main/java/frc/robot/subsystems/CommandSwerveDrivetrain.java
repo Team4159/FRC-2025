@@ -13,12 +13,14 @@ import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -32,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.AdjustableSlewRateLimiter;
 import frc.robot.Constants;
-import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -73,8 +74,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final Field2d closestPoseF2d = new Field2d();
     private Pose2d closestAutoAlignPose = new Pose2d();
 
-    private AdjustableSlewRateLimiter limiterX = new AdjustableSlewRateLimiter(1, -1, 0);
-    private AdjustableSlewRateLimiter limiterY = new AdjustableSlewRateLimiter(1, -1, 0);
+    private AdjustableSlewRateLimiter limiter = new AdjustableSlewRateLimiter(1, -1, 0);
 
     private Elevator elevator;
 
@@ -301,32 +301,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     /** uses robot relative control */
-    public void ManualAlign(double inputX, double inputY){
-        double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
-        double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
-        // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
-        //     speedX *= -1;
-        //     speedY *= -1;
-        // }
-        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, 0);
-        setControl(m_driveApplyRobotSpeeds.withSpeeds(desiredSpeeds));
+    public void robotRelative(double inputX, double inputY){
+        setControl(m_driveApplyRobotSpeeds.withSpeeds(
+            ChassisSpeeds.fromRobotRelativeSpeeds(limit(inputX, inputY, 0), getState().Pose.getRotation())
+        ));
     }
 
     /** uses field relative control */
     public void drive(double inputX, double inputY, double inputOmega){
-        //System.out.println(maxAccel);
-        //desiredYaw += inputOmega*0.02;
-        //desiredYaw = MathUtil.angleModulus(desiredYaw);
-        double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
-        double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
-        //double speedT = m_omegaController.calculate(getState().Pose.getRotation().getRadians(), desiredYaw);
-        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
-            speedX *= -1;
-            speedY *= -1;
-        }
-        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega* 4);
-        setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
-        
+        setControl(m_driveApplyFieldSpeeds.withSpeeds(
+        ChassisSpeeds.fromRobotRelativeSpeeds(limit(inputX, inputY, inputOmega) , getState().Pose.getRotation())
+       ));
+    }
+
+    private ChassisSpeeds limit(double x, double y, double omega) {
+        Vector<N2> velocity = VecBuilder.fill(x, y);
+        velocity = velocity.times(limiter.calculate(velocity.norm()));
+        return new ChassisSpeeds(velocity.get(0), velocity.get(1), omega);
     }
 
     public void stopSwerve(){
@@ -406,8 +397,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private void setMaxAccel(){
         if(elevator != null){
             maxAccel = MathUtil.interpolate(Constants.Swerve.maxAccelFullRetraction, Constants.Swerve.maxAccelFullExtension, elevator.getHeight() / Constants.Elevator.maxHeight);
-            limiterX.setRateLimits(maxAccel, -maxAccel);
-            limiterY.setRateLimits(maxAccel, -maxAccel);
+            limiter.setRateLimits(maxAccel, -maxAccel);
         }
     }
 
@@ -459,7 +449,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
         public void execute(){
-            ManualAlign(inputX, inputY);
+            robotRelative(inputX, inputY);
         }
     }
 }

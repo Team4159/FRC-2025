@@ -3,7 +3,6 @@ package frc.robot;
 import java.util.List;
 import java.util.Map;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
@@ -125,60 +124,49 @@ public class Constants {
         public static final int rollerMotorID = 5;
         public static final int beamBreakDIO = 9;
 
-        public static final double gearRatio = 60;
-        public static final double MOI = 0.2466;
-        public static final double lengthMeters = 0.405;
-
-        public static final double kSEmpty = 0;
+        public static final double kS = 0;
         public static final double kGEmpty = 0.3;//0.34;//0.8/12;//1.45/12;//2.45/12;
-        public static final double kVEmpty = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
-        public static final double kAEmpty = 0.02;//0.03/12;//0.05/12;//0.15/12;
-
-        public static final double kSCoral = 0;
-        public static final double kGCoral = 0.35;//0.34;//0.8/12;//1.45/12;//2.45/12;
-        public static final double kVCoral = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
-        public static final double kACoral = 0.02;//0.03/12;//0.05/12;//0.15/12;
-
-        public static final ArmFeedforward angleFFEmpty = new ArmFeedforward(kSEmpty, kGEmpty, kVEmpty, kAEmpty);
-        public static final ArmFeedforward angleFFCoral = new ArmFeedforward(kSCoral, kGCoral, kVCoral, kACoral);
+        public static final double kGFull = 0.35;//0.34;//0.8/12;//1.45/12;//2.45/12;
+        public static final double kV = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
+        public static final double kA = 0.02;//0.03/12;//0.05/12;//0.15/12;
 
         public static final double kP = 2;
         public static final double kI = 0.05;
         public static final double kD = 0;
-        public static final double maxVelocity = 7;
-        public static final double maxAcceleration = 7;
+        public static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(4 * Math.PI, 2 * Math.PI);
 
         public static final double FFOffset = Units.rotationsToRadians(-0.1);
 
-        public static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
-        public static final ProfiledPIDController anglePID = new ProfiledPIDController(kP, kI, kD, constraints);
-
         public static final double angleTolerance = Math.PI/16;
-
-        public static enum CoralManipulatorPivotState{
+        public static enum PivotState {
             STOW(0),
-            INTAKE(Units.degreesToRadians(0)),
-            ALGAEREMOVAL(Units.degreesToRadians(150)),
-            TROUGH(Units.degreesToRadians(200)),
-            L2(Units.degreesToRadians(200)),
-            L3(Units.degreesToRadians(190)),
-            L4(Units.degreesToRadians(196));
+            INTAKE(0),
+            CLEAN(150),
+            L1(200),
+            L2(200),
+            L3(190),
+            L4(196);
 
             public double angle;
-            private CoralManipulatorPivotState(double angle){
-                this.angle = angle;
+            private PivotState(double radians) {
+                this.angle = Units.degreesToRadians(radians);
             }
         }
 
-        public static enum CoralManipulatorRollerState{
-            PASSIVE(0.02),
-            INTAKE(1),
-            OUTTAKE(-1),
-            OUTTAKETROUGH(-0.2);
+        public static final double coralTransitTime = 2; // seconds
+        public static enum RollerState {
+            IDLE(0, null),
+            PASSIVE(0.02, null),
+            INTAKE(1, true),
+            OUTTAKE(-1, false),
+            OUTTAKETROUGH(-0.2, false),
+            CLEAN(-1, null); // removing algae
 
-            public double spin;
-            private CoralManipulatorRollerState(double spin){
+            public final double spin;
+            public final Boolean wantsCoral;
+            private RollerState(double spin, Boolean wantsCoral){
                 this.spin = spin;
+                this.wantsCoral = wantsCoral;
             }
         }
     }

@@ -16,17 +16,17 @@
 //         new MechanismLigament2d("CoralManipulatorPivot", 10, 0));
 
 //     private final Elevator elevator;
-//     private final CoralManipulatorPivot coralManipulatorPivot;
+//     private final CoralManipulatorPivot ;
 
-//     public ElevatorArmSimulation(Elevator elevator, CoralManipulatorPivot coralManipulatorPivot){
+//     public ElevatorArmSimulation(Elevator elevator, CoralManipulatorPivot ){
 //         this.elevator = elevator;
-//         this.coralManipulatorPivot = coralManipulatorPivot;
+//         this. = ;
 //         SmartDashboard.putData("CoralSimulator", m_mech2d);
 //     }
 
 //     @Override
 //     public void periodic(){
 //         m_elevatorMech2d.setLength(elevator.getSimPosition() * 50 + 5);
-//         m_CoralManipulatorPivotMech2d.setAngle(Units.radiansToDegrees(coralManipulatorPivot.getSimPosition()));
+//         m_CoralManipulatorPivotMech2d.setAngle(Units.radiansToDegrees(.getSimPosition()));
 //     }
 // }
