@@ -18,10 +18,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Constants {
     public static final class Swerve{
-        public static final int distanceSensorPingDIO = 0;
-        public static final int distanceSensorEchoDIO = 1;
-        //accounts for dist sensor is located behind bumper
-        public static final double distSensorAutoAlignDistInches = 6;
         //bumpers included
         /** Units: meters */
         public static final double width = Units.inchesToMeters(33);
@@ -45,8 +41,9 @@ public class Constants {
             new ProfiledPIDController(5, 0, 0,
                     new TrapezoidProfile.Constraints(2, 2)));
 
+        /**TODO tune accel limiting after ballast added */
         public static final double maxAccelFullExtension = 2;
-        public static final double maxAccelFullRetraction = 3;
+        public static final double maxAccelFullRetraction = 8;
     }
 
     public static final class Deepclimb {

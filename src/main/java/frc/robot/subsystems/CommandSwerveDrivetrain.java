@@ -1,9 +1,14 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -12,13 +17,16 @@ import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -60,8 +68,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController m_pathThetaController = new PIDController(5, 0, 0);
 
     //private double desiredYaw;
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity 0.75 old value
 
-    private final SwerveRequest.ApplyFieldSpeeds m_driveApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+    private final SwerveRequest.FieldCentric m_fieldCentricClosedLoopRequest = new SwerveRequest.FieldCentric()
+    .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+    .withDriveRequestType(DriveRequestType.Velocity); // use closed loop control for drive motors
     private final SwerveRequest.ApplyRobotSpeeds m_driveApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     /* Swerve requests to apply during SysId characterization */
@@ -314,18 +326,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /** uses field relative control */
     public void drive(double inputX, double inputY, double inputOmega){
-        //System.out.println(maxAccel);
-        //desiredYaw += inputOmega*0.02;
-        //desiredYaw = MathUtil.angleModulus(desiredYaw);
-        double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
-        double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
-        //double speedT = m_omegaController.calculate(getState().Pose.getRotation().getRadians(), desiredYaw);
-        if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
-            speedX *= -1;
-            speedY *= -1;
-        }
-        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega* 4);
-        setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
+        //open loop
+        // double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1));
+        // double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1));
+        // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
+        //     speedX *= -1;
+        //     speedY *= -1;
+        // }
+        // Vector<N2> desiredSpeedVector = VecBuilder.fill(speedX, speedY);
+        // if(desiredSpeedVector.norm() > 1){
+        //     desiredSpeedVector = desiredSpeedVector.unit();
+        // }
+        // ChassisSpeeds desiredSpeeds = new ChassisSpeeds(desiredSpeedVector.get(0), desiredSpeedVector.get(1), inputOmega* 4);
+        // setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
+
+        //closed loop
+        double desiredSpeedX = limiterX.calculate(inputX * MaxSpeed);
+        double desiredSpeedY = limiterY.calculate(inputY * MaxSpeed);
+        setControl(m_fieldCentricClosedLoopRequest.withVelocityX(desiredSpeedX).withVelocityY(desiredSpeedY).withRotationalRate(inputOmega * MaxAngularRate));
         
     }
 
