@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import java.util.function.BooleanSupplier;
 
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -12,15 +13,17 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
+import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 
-public class CoralManipulatorPivot extends SubsystemBase{
+public class CoralManipulator extends SubsystemBase {
+    // pivot 
     private SparkFlex angleMotor;
     private double targetPosition;
-    private BooleanSupplier hasCoralSupplier;
 
     //simulation
     private DCMotor gearbox = DCMotor.getNeoVortex(1);
@@ -38,21 +41,32 @@ public class CoralManipulatorPivot extends SubsystemBase{
     // private SparkFlexSim motorSim;
     // private SparkAbsoluteEncoderSim encoderSim;
 
-    public CoralManipulatorPivot(BooleanSupplier hasCoralSupplier){
+    // roller
+    public SparkMax rollerMotor;
+    public DigitalInput beamBreak;
+
+    public CoralManipulator() {
+
+        //pivot
         angleMotor = new SparkFlex(Constants.CoralManipulator.angleMotorID, MotorType.kBrushless);
         // motorSim = new SparkFlexSim(angleMotor, gearbox);
         // encoderSim = motorSim.getAbsoluteEncoderSim();
         targetPosition = Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE.angle;
-        this.hasCoralSupplier = hasCoralSupplier;
+
+        //roller
+        rollerMotor = new SparkMax(Constants.CoralManipulator.rollerMotorID, MotorType.kBrushless);
+        beamBreak = new DigitalInput(Constants.CoralManipulator.beamBreakDIO);
+        setRollerGoalState(CoralManipulatorRollerState.PASSIVE);
     }
 
     @Override
     public void periodic(){
+        //pivot
         if(DriverStation.isEnabled()){
             Constants.CoralManipulator.anglePID.setGoal(targetPosition);
             double pid = Constants.CoralManipulator.anglePID.calculate(getAngle());
             double ff;
-            if(hasCoralSupplier.getAsBoolean()){
+            if(hasCoral()){
                 //if there is a coral it will use the FF for coral
                 ff = Constants.CoralManipulator.angleFFCoral.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
             }
@@ -65,10 +79,17 @@ public class CoralManipulatorPivot extends SubsystemBase{
         }
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
         SmartDashboard.putNumber("armposition", Units.radiansToDegrees(getAngle()));
+
+        //roller
+        SmartDashboard.putBoolean("Coral", hasCoral());
     }
 
     public double getAngle(){
         return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset;
+    }
+
+    public boolean hasCoral(){
+        return !beamBreak.get();
     }
 
     // public void simulationPeriodic(){
@@ -101,24 +122,29 @@ public class CoralManipulatorPivot extends SubsystemBase{
     }
 
     /** @param desiredState desired final state of coral manipulator pivot */
-    public void setGoalState(CoralManipulatorPivotState desiredState){
+    public void setPivotGoalState(CoralManipulatorPivotState desiredState){
         targetPosition = desiredState.angle;
         Constants.CoralManipulator.anglePID.reset(getAngle());
     }
 
-    public class ChangeState extends Command{
+    /** @param desiredState the desired final state of coral manipulator roller */
+    public void setRollerGoalState(CoralManipulatorRollerState desiredState){
+        rollerMotor.set(desiredState.spin);
+    }
+
+    public class ChangePivotState extends Command {
         private CoralManipulatorPivotState state;
         private boolean continuous;
 
-        public ChangeState(CoralManipulatorPivotState desiredState, boolean continuous){
+        public ChangePivotState(CoralManipulatorPivotState desiredState, boolean continuous){
             state = desiredState;
             this.continuous = continuous;
-            addRequirements(CoralManipulatorPivot.this);
+            addRequirements(CoralManipulator.this);
         }
 
         @Override
         public void initialize(){
-            CoralManipulatorPivot.this.setGoalState(state);
+            CoralManipulator.this.setPivotGoalState(state);
         }
 
         @Override
@@ -127,4 +153,24 @@ public class CoralManipulatorPivot extends SubsystemBase{
             return !continuous && MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
         }
     }
+
+    public class ChangeRollerState extends Command {
+        private CoralManipulatorRollerState state;
+
+        public ChangeRollerState(CoralManipulatorRollerState state){
+            this.state = state;
+            addRequirements(CoralManipulator.this);
+        }
+
+        @Override
+        public void initialize(){
+            CoralManipulator.this.setRollerGoalState(state);
+        }
+
+        @Override
+        public void end(boolean interrupted){
+            CoralManipulator.this.setRollerGoalState(CoralManipulatorRollerState.PASSIVE);
+        }
+    }
+
 }
