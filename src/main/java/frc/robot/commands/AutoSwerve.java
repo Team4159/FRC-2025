@@ -49,21 +49,7 @@ public class AutoSwerve extends Command{
         double sx = translationSpeed * Math.signum(desiredPose.getX() - robotPose.getX()) * Math.abs(Math.cos(angle));
         double sy = translationSpeed * Math.signum(desiredPose.getY() - robotPose.getY()) * Math.abs(Math.sin(angle));
         double st = Constants.Swerve.rotationController.calculate(robotPose.getRotation().getRadians(), desiredPose.getRotation().getRadians());
-        //swerve.drive(sx, sy, st);
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(sx, sy, st), robotPose.getRotation());
         swerve.setControl(applyRobotSpeeds.withSpeeds(speeds));
     }
-
-    // @Override
-    // public boolean isFinished(){
-    //     boolean finished =  MathUtil.isNear(desiredPose.get().getX(), swerve.getState().Pose.getX(), Constants.Swerve.autoSwerveToleranceXY)
-    //     && MathUtil.isNear(desiredPose.get().getY(), swerve.getState().Pose.getY(), Constants.Swerve.autoSwerveToleranceXY)
-    //     && MathUtil.isNear(desiredPose.get().getRotation().getRadians(), swerve.getState().Pose.getRotation().getRadians(), Constants.Swerve.autoSwerveToleranceTheta);
-    //     //return finished;
-    //     return false;
-    // }
-
-    // public void end(boolean interrupted){
-    //     swerve.setControl(brake);
-    // }
 }

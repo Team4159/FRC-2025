@@ -45,13 +45,11 @@ public class AutoOuttake extends Command{
 
     @Override
     public boolean isFinished(){
-       // System.out.println("using autooutake");
         if(!coralManipulator.hasCoral() && timeOffset == 0){
             timeOffset = Timer.getFPGATimestamp();
         }
         return (!coralManipulator.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 1.5 )|| 
                (backupTimer && Timer.getFPGATimestamp() - backupTimeOffset > 2);
-        //return false;
     }
 
     @Override

@@ -12,25 +12,18 @@ import frc.robot.subsystems.LED;
 
 public class AutoAlign extends AutoSwerve{
     private boolean left;
-    // private Trajectory traj;
-    // private boolean trajMode;
     private boolean tooFar;
-    // private Timer timer;
     private LED led;
 
-    // public AutoAlign(CommandSwerveDrivetrain swerve){
-    //     this(swerve, false, false);
-    // }
-
-    // public AutoAlign(CommandSwerveDrivetrain swerve, boolean L4){
-    //     this(swerve, L4, false);
-    // }
-
+    /**
+     * @param swerve CommandSwerveDrivetrain subsystem for the swerve drivetrain
+     * @param led LED subsystem(Status Lights: Red Blink = too far to align, Yellow Blink = aligning, Green Blink = aligned)
+     * @param left If true the robot will align to the robot relative left closest reef pole, otherwise it will align to the robot relative closest right pole
+     */
     public AutoAlign(CommandSwerveDrivetrain swerve, LED led, boolean left){
         super(swerve);
         this.left = left;
         this.led = led;
-        // timer = new Timer();
     }
 
     @Override
@@ -42,7 +35,6 @@ public class AutoAlign extends AutoSwerve{
             reefTranslation = new Translation2d(Constants.Field.fieldLength/2 + Constants.Field.reefDistFromCenter, Constants.Field.fieldWidth/2);
         //check if close enough
         if(swerve.getState().Pose.getTranslation().getDistance(reefTranslation) < Constants.Swerve.maxReefAutoAlignDistatnce){
-            //desiredPose = swerve.getDesieredAutoAlignPose(L4, secondClosestPose);
             var reefPoses = Constants.Field.reef.get(DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
             var closestSide = swerve.getState().Pose.nearest(reefPoses);
             var angle = closestSide.getRotation().getRadians() - Math.PI/2;
@@ -52,14 +44,6 @@ public class AutoAlign extends AutoSwerve{
             else{
                 desiredPose = new Pose2d(closestSide.getX() + Constants.Field.middletoPole * Math.cos(angle), closestSide.getY() + Constants.Field.middletoPole * Math.sin(angle), closestSide.getRotation());
             }
-            // traj = TrajectoryGenerator.generateTrajectory(swerve.getState().Pose, new ArrayList<Translation2d>(), desiredPose, new TrajectoryConfig(1, 1));
-            // if(traj.equals(new Trajectory(List.of(new Trajectory.State())))){
-            //     trajMode = false;
-            // }
-            // else{
-            //     trajMode = true;
-            // }
-            // timer.restart();
             tooFar = false;
             led.blink(Color.kYellow);
             super.initialize();
@@ -72,21 +56,7 @@ public class AutoAlign extends AutoSwerve{
     @Override
     public void execute(){
         if(tooFar) return;
-        // if(trajMode){
-        //     System.out.println("traj");
-        //     var state = traj.sample(timer.get());
-        //     // swerve.setModuleStates(Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-        //     //     controller.calculate(kinesthetics.getPose(), state, state.poseMeters.getRotation())
-        //     // ));
-        //     ChassisSpeeds speeds = Constants.Swerve.holonomicController.calculate(swerve.getState().Pose, state, state.poseMeters.getRotation());
-        //     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, swerve.getState().Pose.getRotation());
-        //     swerve.setControl(applyRobotSpeeds.withSpeeds(speeds));
-        // }
-        // else{
-            //System.out.println("pid");
-            super.execute();
-        // }
-        //System.out.println(swerve.getDesieredAutoAlignPose(L4, secondClosestPose).getX());
+        super.execute();
     }
 
     @Override
@@ -111,34 +81,4 @@ public class AutoAlign extends AutoSwerve{
         }
     }
 }
-
-// public class AutoAlign extends TrajSwerve{
-//     boolean L4, secondClosestPose;
-
-//     public AutoAlign(CommandSwerveDrivetrain swerve){
-//         this(swerve, false, false);
-//     }
-
-//     public AutoAlign(CommandSwerveDrivetrain swerve, boolean L4){
-//         this(swerve, L4, false);
-//     }
-
-//     public AutoAlign(CommandSwerveDrivetrain swerve, boolean L4, boolean secondClosestPose){
-//         super(swerve);
-//         this.L4 = L4;
-//         this.secondClosestPose = secondClosestPose;
-//     }
-
-//     @Override
-//     public void initialize(){
-//         setDesiredPose(swerve.getDesieredAutoAlignPose(L4, secondClosestPose));
-//         super.initialize();
-//     }
-
-//     @Override
-//     public void execute(){
-//         super.execute();
-//         //System.out.println(swerve.getDesieredAutoAlignPose(L4, secondClosestPose).getX());
-//     }
-// }
 

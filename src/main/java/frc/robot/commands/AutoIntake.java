@@ -14,7 +14,6 @@ public class AutoIntake extends Command{
     private Elevator elevator;
     private double timeOffset;
     private boolean useBeamBreak;
-    //private double simTimeOffset;
     private LED led;
 
     /** @param useBeamBreak if set to true the command will end when the beam break detects a coral */
@@ -23,7 +22,6 @@ public class AutoIntake extends Command{
         this.elevator = elevator;
         this.useBeamBreak = useBeamBreak;
         this.led = led;
-        //led.setDefaultCommand(led.new ChromaLED((double i) -> Color.fromHSV((int)Math.floor(i * 180), 255, 255)).repeatedly());
         addRequirements(coralManipulator, elevator);
     }
 
@@ -37,14 +35,11 @@ public class AutoIntake extends Command{
         coralManipulator.setPivotGoalState(CoralManipulatorPivotState.INTAKE);
         coralManipulator.setRollerGoalState(CoralManipulatorRollerState.INTAKE);
         elevator.setGoalState(ElevatorState.INTAKE);
-        // simTimeOffset = Timer.getFPGATimestamp();
         led.rainbow();
     }
 
     @Override
     public boolean isFinished(){
-        //if(RobotBase.isSimulation() && Timer.getFPGATimestamp() - simTimeOffset > 5)
-            //return true;
         if(coralManipulator.hasCoral() && timeOffset == 0){
             timeOffset = Timer.getFPGATimestamp();
         }
