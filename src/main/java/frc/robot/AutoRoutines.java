@@ -60,11 +60,15 @@ public class AutoRoutines extends SubsystemBase{
         return getRoutine(false);
     }
 
+    /**
+     * @param preview If true the function will also generate a preview on a Field2d for SmartDashboard.
+     * @return The Choreo AutoRoutine with the desired criteria from SmartDashboard
+     */
     public AutoRoutine getRoutine(boolean preview){
         final AutoRoutine routine = m_factory.newRoutine("routine");
         final String start = startChooser.getSelected();
         final String s1 = station1Chooser.getSelected();
-        //final String s2 = station2Chooser.getSelected();
+        //final String s2 = station2Chooser.getSelected();git d
         if(start == null || reef1Chooser.getSelected() == null || s1 == null || reef2Chooser.getSelected() == null){
             System.out.println("null values");
             return routine;
@@ -141,13 +145,12 @@ public class AutoRoutines extends SubsystemBase{
                 updateField(starttoTrough);
             }
         }
-        //System.out.println("get routine");
         this.routine = routine;
         return routine;
     }
 
     /**
-     * @return The current routine if generated, otherwise it runs the getRoutine function and returns the result.
+     * @return The current Choreo AutoRoutine(Using criteria from SmartDashboard) if generated(Driver has to press "generate" button on dashboard), otherwise it runs the getRoutine function and returns the result.
      */
     public AutoRoutine getGeneratedRoutine(){
         if(routine == null){
@@ -156,29 +159,15 @@ public class AutoRoutines extends SubsystemBase{
         return routine;
     }
 
-    // @Override
-    // public void periodic(){
-    //     getRoutine();
-    // }
-
     public void updateField(AutoTrajectory... trajectories){
         trajectory = new edu.wpi.first.math.trajectory.Trajectory();
         for(int i = 0; i < trajectories.length; i++){
             Trajectory<SwerveSample> choreoTrajectory = trajectories[i].getRawTrajectory();
-            // field2d.getObject(traj.toString()+" traj").setPoses(
-            // traj.getInitialPose().orElse(new Pose2d()), traj.getFinalPose().orElse(new Pose2d())
-            // );
-            // field2d.getObject(traj.toString()+" trajPoses").setPoses(
-            //     t.getPoses()
-            // );
 
             ArrayList<Pose2d> poses = new ArrayList<Pose2d>();
             for(int j = 0; j < choreoTrajectory.getPoses().length; j++){
                 poses.add(choreoTrajectory.getPoses()[j]);
             }
-            //edu.wpi.first.math.trajectory.Trajectory wpilibTraj = new edu.wpi.first.math.trajectory.Trajectory();\
-            //PoseTrajectory pt = new PoseTrajectory(poses);
-            //poseTrajectory.concatenate(pt);
             PoseTrajectory pt = new PoseTrajectory(poses);
             trajectory = trajectory.concatenate(pt);
         }
