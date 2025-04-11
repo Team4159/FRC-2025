@@ -34,7 +34,6 @@ public class AlgaeIntake extends SubsystemBase {
     @Override
     public void periodic(){
         double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
-        //System.out.println(targetAngle + " " + currentAngle);
         pivot.set(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
     }
 

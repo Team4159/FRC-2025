@@ -57,10 +57,6 @@ public class Constants {
             private deepClimbStates(double s){
                 speed = s;
             }
-
-            // public double getSpeed_deepClimb(){
-            //     return speed;
-            // }
         }
         
         
@@ -79,8 +75,6 @@ public class Constants {
         public static final double maxHeight = Units.inchesToMeters(21);
         public static final double rotationsPerMeter = elevatorGearing / (Math.PI*spoolDiameter);
 
-        //public static final double zeroModeThreshold = 0;
-
         public static final double elevatorTolerance = 0.0025;
 
         public static final double kS = 0.15;
@@ -97,7 +91,6 @@ public class Constants {
         public static final double maxVelocity = 10;
         public static final double maxAcceleration = 10;
 
-        //public static final TrapezoidProfile.Constraints trapezoidProfileConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
         public static final TrapezoidProfile.Constraints PIDConstraints = new Constraints(maxVelocity, maxAcceleration);
         public static final ProfiledPIDController elevatorPID = new ProfiledPIDController(kP, kI, kD, PIDConstraints);
 

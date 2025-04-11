@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import choreo.auto.AutoFactory;
@@ -34,36 +33,24 @@ import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity 0.75 old value
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
-            .withDriveRequestType(DriveRequestType.Velocity);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    //ps4 controller for simulation at home
-    //private final CommandPS4Controller joystick = new CommandPS4Controller(2);
-
     //joysticks
     private final CommandJoystick driveStick = new CommandJoystick(0);
-
     private final CommandJoystick secondaryStick = new CommandJoystick(1);
 
     //triggers
-    private final Trigger outtake = secondaryStick.button(1);//.or(joystick.L2());
-    private final Trigger intake = secondaryStick.button(2);//.or(joystick.R2());
-    //private final Trigger l1 = secondaryStick.button(8).or(joystick.cross());
+    private final Trigger outtake = secondaryStick.button(1);
+    private final Trigger intake = secondaryStick.button(2);
     private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
     private final Trigger AlgaeRemoval = secondaryStick.button(9);
-    private final Trigger l2 = secondaryStick.button(5);//.or(joystick.square());
-    private final Trigger l3 = secondaryStick.button(6);//.or(joystick.circle());
-    private final Trigger l4 = secondaryStick.button(7);//.or(joystick.triangle());
+    private final Trigger l2 = secondaryStick.button(5);
+    private final Trigger l3 = secondaryStick.button(6);
+    private final Trigger l4 = secondaryStick.button(7);
     private final Trigger forceVision = driveStick.button(13);
     private final Trigger autoAlignLeft = driveStick.button(11);
     private final Trigger autoAlignRight = driveStick.button(12);
@@ -105,37 +92,8 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            //PS4 controller for simulation
-            // drivetrain.applyRequest(() ->
-            //     drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-            //         .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            //         .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            // )
-
-            // drivetrain.applyRequest(() ->
-            //     drive.withVelocityX(-driveStick.getY() * MaxSpeed) // Drive forward with negative Y (forward)
-            //         .withVelocityY(-driveStick.getX() * MaxSpeed) // Drive left with negative X (left)
-            //         .withRotationalRate(-driveStick.getZ() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            // )
             drivetrain.new Drive(driveStick)
         );
-
-        //PS4 controller
-
-        // joystick.square().whileTrue(new AutoAlign(drivetrain));
-        // joystick.triangle().whileTrue(new AutoAlign(drivetrain, true));
-        // //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
-        // joystick.cross().whileTrue(drivetrain.applyRequest(() -> brake));
-        // joystick.circle().whileTrue(drivetrain.applyRequest(() ->
-        //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        // ));
-
-        // joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
-        //     forwardStraight.withVelocityX(0.5).withVelocityY(0))
-        // );
-        // joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
-        //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-        // );
 
         driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0.15, 0));
         driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, -0.15));
@@ -146,56 +104,37 @@ public class RobotContainer {
         autoAlignRight.whileTrue(new AutoAlign(drivetrain, led, false));
         forceVision.whileTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
-        //joystick.square().whileTrue(drivetrain.getAutoAlignCommand());
         driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));
-
-        // joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
-        //     forwardStraight.withVelocityX(0.5).withVelocityY(0))
-        // );
-        // joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
-        //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-        // );
-
-        // Note that each routine should be run exactly once in a single log.
-        // driveStick.button(5).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // driveStick.button(6).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // driveStick.button(7).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // driveStick.button(8).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-        // reset the field-centric heading on left bumper press
-        // joystick.L2().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        //forceVision.onTrue(drivetrain.forceVision());
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
         outtake.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         outtakeTrough.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
-        //intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
         intake.whileTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.rainbow()),
-            elevator.new ChangeState(ElevatorState.INTAKE, true),
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.INTAKE, false),
+            elevator.new ChangeState(ElevatorState.INTAKE),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.INTAKE),
             coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
         l2.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
-            elevator.new ChangeState(ElevatorState.L2, false),
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L2, false)));
+            elevator.new ChangeState(ElevatorState.L2),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L2)));
         l3.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kBlue)),
-            elevator.new ChangeState(ElevatorState.L3, false),
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3, false)));
+            elevator.new ChangeState(ElevatorState.L3),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3)));
         l4.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
-            elevator.new ChangeState(ElevatorState.L4, false),
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4, false)));
+            elevator.new ChangeState(ElevatorState.L4),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4)));
         AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3, false),
-            elevator.new ChangeState(ElevatorState.L3, false),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3),
+            elevator.new ChangeState(ElevatorState.L3),
             coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)));
         AlgaeRemoval.onTrue(new ParallelCommandGroup(
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.ALGAEREMOVAL, false),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.ALGAEREMOVAL),
             coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)));
 
         secondaryStick.button(12).whileTrue(
@@ -217,14 +156,6 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new InstantCommand(() -> led.light(Color.kRed)),
                 deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD)));
-
-        // led.bindButton(intake, LEDState.RAINBOW);
-        // led.bindButton(secondaryStick.button(12).or(secondaryStick.button(13)), LEDState.TURQUOISE);
-        // led.bindButton(l4, LEDState.PURPLE);
-        // led.bindButton(l3, LEDState.BLUE);
-        // led.bindButton(l2, LEDState.GREEN);
-        // led.bindButton(l1, LEDState.WHITE);
-        // led.bindButton(secondaryStick.button(15).or(secondaryStick.button(14)), LEDState.RED);
     }
 
     public Command getAutonomousCommand() {

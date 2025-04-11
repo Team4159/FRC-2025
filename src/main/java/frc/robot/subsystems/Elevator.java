@@ -46,9 +46,6 @@ public class Elevator extends SubsystemBase{
 
     @Override
     public void periodic(){
-        //System.out.println(elevatorSim.getPositionMeters());
-        //System.out.println(targetPosition);
-        //Constants.Elevator.elevatorPID.setGoal(targetPosition);
         if(!zeroMode && DriverStation.isEnabled()){
             double PIDOutput = Constants.Elevator.elevatorPID.calculate(getHeight());
             double FFOutput = Constants.Elevator.elevatorFF.calculate(Constants.Elevator.elevatorPID.getSetpoint().velocity);
@@ -56,7 +53,6 @@ public class Elevator extends SubsystemBase{
             if(motor.getReverseLimitSwitch().isPressed()){
                 motor.getEncoder().setPosition(0);
             }
-            //SmartDashboard.putNumber("desiredPosition", targetPosition);
         }
         else{
             motor.set(-0.2);
@@ -114,17 +110,10 @@ public class Elevator extends SubsystemBase{
         private Constants.Elevator.ElevatorState elevatorState;
         private boolean continuous;
 
-        // public ChangeState(Constants.Elevator.ElevatorState elevatorState){
-        //     this.elevatorState = elevatorState;
-        //     addRequirements(Elevator.this);
-        // }
-
         /** @param elevatorState desired state for the elevator 
-         * @param continuous if true the command will not end, if false the command will end when at desired position
         */
-        public ChangeState(Constants.Elevator.ElevatorState elevatorState, boolean continuous){
+        public ChangeState(Constants.Elevator.ElevatorState elevatorState){
             this.elevatorState = elevatorState;
-            this.continuous = continuous;
             addRequirements(Elevator.this);
         }
 
@@ -135,8 +124,6 @@ public class Elevator extends SubsystemBase{
 
         @Override
         public boolean isFinished(){
-            //System.out.println("elevator: " + MathUtil.isNear(getHeight(), targetPosition, Constants.Elevator.elevatorTolerance));
-            //System.out.println(getHeight() + " " + Constants.Elevator.elevatorPID.getGoal().position);
             return !continuous && MathUtil.isNear(getHeight(), Constants.Elevator.elevatorPID.getGoal().position, Constants.Elevator.elevatorTolerance);
         }
     }

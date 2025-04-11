@@ -17,16 +17,12 @@ import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -316,10 +312,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void ManualAlign(double inputX, double inputY){
         double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
         double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
-        // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
-        //     speedX *= -1;
-        //     speedY *= -1;
-        // }
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, 0);
         setControl(m_driveApplyRobotSpeeds.withSpeeds(desiredSpeeds));
     }
@@ -327,17 +319,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /** uses field relative control */
     public void drive(double inputX, double inputY, double inputOmega){
         //open loop
-        // double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1));
-        // double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1));
-        // if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red)){
-        //     speedX *= -1;
-        //     speedY *= -1;
-        // }
-        // Vector<N2> desiredSpeedVector = VecBuilder.fill(speedX, speedY);
-        // if(desiredSpeedVector.norm() > 1){
-        //     desiredSpeedVector = desiredSpeedVector.unit();
-        // }
-        // ChassisSpeeds desiredSpeeds = new ChassisSpeeds(desiredSpeedVector.get(0), desiredSpeedVector.get(1), inputOmega* 4);
+        // double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX * MaxSpeed, 0.1));
+        // double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY * MaxSpeed, 0.1));
+        // ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega* 4);
         // setControl(m_driveApplyFieldSpeeds.withSpeeds(desiredSpeeds));
 
         //closed loop
@@ -349,7 +333,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void stopSwerve(){
         setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
-        //System.out.println("stopping");
     }
 
     public void calculateClosestReef(){

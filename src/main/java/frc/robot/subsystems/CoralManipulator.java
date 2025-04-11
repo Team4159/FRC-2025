@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
-
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -75,7 +73,6 @@ public class CoralManipulator extends SubsystemBase {
                 ff = Constants.CoralManipulator.angleFFEmpty.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
             }
             angleMotor.setVoltage(ff + pid);
-            //System.out.println(Constants.CoralManipulator.anglePID.getSetpoint().velocity);
         }
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
         SmartDashboard.putNumber("armposition", Units.radiansToDegrees(getAngle()));
@@ -134,11 +131,9 @@ public class CoralManipulator extends SubsystemBase {
 
     public class ChangePivotState extends Command {
         private CoralManipulatorPivotState state;
-        private boolean continuous;
 
-        public ChangePivotState(CoralManipulatorPivotState desiredState, boolean continuous){
+        public ChangePivotState(CoralManipulatorPivotState desiredState){
             state = desiredState;
-            this.continuous = continuous;
             addRequirements(CoralManipulator.this);
         }
 
@@ -149,8 +144,7 @@ public class CoralManipulator extends SubsystemBase {
 
         @Override
         public boolean isFinished(){
-            //System.out.println("coralmanip: " + MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance));
-            return !continuous && MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
+            return MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
         }
     }
 
