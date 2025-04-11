@@ -29,9 +29,7 @@ import frc.robot.commands.AutoAlign;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CoralManipulatorPivot;
-//import frc.robot.subsystems.CoralManipulatorPivot;
-import frc.robot.subsystems.CoralManipulatorRoller;
+import frc.robot.subsystems.CoralManipulator;
 import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
@@ -78,8 +76,7 @@ public class RobotContainer {
 
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
-    private final CoralManipulatorRoller coralManipulatorRoller = new CoralManipulatorRoller();
-    private final CoralManipulatorPivot coralManipulatorPivot = new CoralManipulatorPivot(() -> coralManipulatorRoller.hasCoral());
+    private final CoralManipulator coralManipulator = new CoralManipulator();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Deepclimb deepclimb = new Deepclimb();
     private final LED led = new LED();
@@ -92,11 +89,11 @@ public class RobotContainer {
     private final AutoFactory autoFactory;
     private final AutoRoutines autoRoutines;
 
-    private final Trigger beamBreakLEDTrigger = new Trigger(coralManipulatorRoller :: hasCoral);
+    private final Trigger beamBreakLEDTrigger = new Trigger(coralManipulator :: hasCoral);
 
     public RobotContainer() {
         autoFactory = drivetrain.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulatorPivot, coralManipulatorRoller, led);
+        autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulator, led);
 
         drivetrain.setElevator(elevator);
 
@@ -171,35 +168,35 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        outtake.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
-        outtakeTrough.onTrue(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
+        outtake.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
+        outtakeTrough.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         //intake.onTrue(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, true));
         intake.whileTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.rainbow()),
             elevator.new ChangeState(ElevatorState.INTAKE, true),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.INTAKE, false),
-            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.INTAKE)))
-            .onFalse(coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.PASSIVE));
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.INTAKE, false),
+            coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.INTAKE)))
+            .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
         l2.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L2, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L2, false)));
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L2, false)));
         l3.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kBlue)),
             elevator.new ChangeState(ElevatorState.L3, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false)));
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3, false)));
         l4.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
             elevator.new ChangeState(ElevatorState.L4, false),
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false)));
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4, false)));
         AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L3, false),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3, false),
             elevator.new ChangeState(ElevatorState.L3, false),
-            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)));
+            coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)));
         AlgaeRemoval.onTrue(new ParallelCommandGroup(
-            coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, false),
-            coralManipulatorRoller.new ChangeState(CoralManipulatorRollerState.OUTTAKE)));
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.ALGAEREMOVAL, false),
+            coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)));
 
         secondaryStick.button(12).whileTrue(
             new ParallelCommandGroup(
