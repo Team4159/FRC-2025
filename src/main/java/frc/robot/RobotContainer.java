@@ -95,10 +95,10 @@ public class RobotContainer {
             drivetrain.new Drive(driveStick)
         );
 
-        driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0.15, 0));
-        driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, -0.15));
-        driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(secondaryStick, -0.15, 0));
-        driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(secondaryStick, 0, 0.15));
+        driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(0.15, 0));
+        driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(0, -0.15));
+        driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(-0.15, 0));
+        driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(0, 0.15));
 
         autoAlignLeft.whileTrue(new AutoAlign(drivetrain, led, true));
         autoAlignRight.whileTrue(new AutoAlign(drivetrain, led, false));
@@ -161,7 +161,6 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         drivetrain.resetPose(new Pose2d());
         /* Run the routine selected from the auto chooser */
-        //return autoChooser.selectedCommand();
-        return autoRoutines.getRoutine().cmd();
+        return autoRoutines.getGeneratedRoutine().cmd();
     }
 }

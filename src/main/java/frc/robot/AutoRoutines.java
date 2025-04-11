@@ -146,6 +146,9 @@ public class AutoRoutines extends SubsystemBase{
         return routine;
     }
 
+    /**
+     * @return The current routine if generated, otherwise it runs the getRoutine function and returns the result.
+     */
     public AutoRoutine getGeneratedRoutine(){
         if(routine == null){
             return getRoutine();
@@ -189,20 +192,18 @@ public class AutoRoutines extends SubsystemBase{
         station1Chooser.onChange((s) -> station1ChooserUpdate());
         //reef2Chooser.onChange((s) -> reef2ChooserUpdate());
         //station2Chooser.onChange((s) -> station2ChooserUpdate());
-        generatePreview = SmartDashboard.getBoolean("generate preview", false);
+        generatePreview = SmartDashboard.getBoolean("generate", false);
         if(generatePreview){
             getRoutine(true);
-            //System.out.println("generating");
-            //updateField(starttoR1);
             generatePreview = false;
-            SmartDashboard.putBoolean("generate preview", generatePreview);
+            SmartDashboard.putBoolean("generate", generatePreview);
         }
         field2d.getObject("traj").setTrajectory(trajectory);
         SmartDashboard.putData("AutoTrajectory", field2d);
     }
 
     private void instantiatePointChoosers(){
-        SmartDashboard.putBoolean("generate preview", generatePreview);
+        SmartDashboard.putBoolean("generate", generatePreview);
         typeChooser = new SendableChooser<Integer>();
         typeChooser.addOption("Trough", 0);
         typeChooser.addOption("1CL4", 1);

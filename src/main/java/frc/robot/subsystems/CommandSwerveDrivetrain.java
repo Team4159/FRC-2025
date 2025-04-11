@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.AdjustableSlewRateLimiter;
 import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
@@ -404,6 +403,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         setMaxAccel();
     }
 
+    /**
+     * Sets maximum acceleration based on height of the elevator using linear interpolation.
+     */
     private void setMaxAccel(){
         if(elevator != null){
             maxAccel = MathUtil.interpolate(Constants.Swerve.maxAccelFullRetraction, Constants.Swerve.maxAccelFullExtension, elevator.getHeight() / Constants.Elevator.maxHeight);
@@ -428,32 +430,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public class Drive extends Command{
-        CommandPS4Controller ps4Controller;
         CommandJoystick joystick;
-        public Drive(CommandPS4Controller ps4Controller){
-            this.ps4Controller = ps4Controller;
-            addRequirements(CommandSwerveDrivetrain.this);
-        }
+        /**
+         * This command is for field-relative driving in teleop.
+         * It uses closed loop for control
+         * @param joystick CommandJoystick to be used for driving the robot.
+         */
         public Drive(CommandJoystick joystick){
             this.joystick = joystick;
             addRequirements(CommandSwerveDrivetrain.this);
         }
 
         public void execute(){
-            if(ps4Controller != null){
-                drive(MathUtil.applyDeadband(-ps4Controller.getLeftY(), 0.1), MathUtil.applyDeadband(-ps4Controller.getLeftX(), 0.1), MathUtil.applyDeadband(-ps4Controller.getRightX(), 0.1));
-            }
-            else{
-                drive(-joystick.getY(), -joystick.getX(), -joystick.getZ());
-            }
+            drive(-joystick.getY(), -joystick.getX(), -joystick.getZ());
         }
     }
 
     public class ManualAlign extends Command{
         double inputX, inputY;
-        CommandJoystick joystick;
-        public ManualAlign(CommandJoystick joystick, double inputX, double inputY){
-            this.joystick = joystick;
+        /**
+         * This command is for robot-relative driving in teleop.
+         * It is designed for alignment purposes and not regular driving.
+         * @param inputX desired speed in X direction
+         * @param inputX desired speed in Y direction
+         */
+        public ManualAlign(double inputX, double inputY){
             this.inputX = inputX;
             this.inputY = inputY;
             addRequirements(CommandSwerveDrivetrain.this);
