@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
+import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoOuttake;
@@ -56,13 +57,17 @@ public class AutoRoutines extends SubsystemBase{
         instantiatePointChoosers();
     }
 
+    /** 
+     * Does not generate a preview.
+     * @return The Choreo AutoRoutine with the desired criteria from SmartDashboard.
+     */
     public AutoRoutine getRoutine(){
         return getRoutine(false);
     }
 
     /**
      * @param preview If true the function will also generate a preview on a Field2d for SmartDashboard.
-     * @return The Choreo AutoRoutine with the desired criteria from SmartDashboard
+     * @return The Choreo AutoRoutine with the desired criteria from SmartDashboard.
      */
     public AutoRoutine getRoutine(boolean preview){
         final AutoRoutine routine = m_factory.newRoutine("routine");
@@ -84,22 +89,29 @@ public class AutoRoutines extends SubsystemBase{
         final AutoTrajectory S1toR2 = routine.trajectory(s1 + "to" + r2);
         //final AutoTrajectory R2toS2 = routine.trajectory(r2 + "to" + s2);
         //final AutoTrajectory S2toR3 = routine.trajectory(s2 + "to" + r3);
+        //a type of 2 corresponds to a 2 coral auto
         if(typeChooser.getSelected() == 2){
             routine.active().onTrue(
                 starttoR1.resetOdometry()
+                //go to first L4
                 .andThen(
                     new ParallelCommandGroup(
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
+                //score
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
+                //go to first station
                 .andThen(new SequentialCommandGroup(R1toS1.cmd(), new InstantCommand(() -> swerve.stopSwerve())))
+                //intake
                 .andThen(new AutoIntake(coralManipulator, elevator, led))
+                //go to second l4
                 .andThen(
                     new ParallelCommandGroup(
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(S1toR2.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
+                //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true, true))
                 //3 coral probably never to be used :(
                 // .andThen(new SequentialCommandGroup(R2toS2.cmd(), new InstantCommand(() -> swerve.stopSwerve())))
@@ -113,33 +125,40 @@ public class AutoRoutines extends SubsystemBase{
                 // .andThen(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator, true))
             );
             if(preview){
+                //update smartdashboard preview
                 updateField(starttoR1, R1toS1, S1toR2);
             }
         }
+        //a type of 2 corresponds to a 1 coral auto
         else if(typeChooser.getSelected() == 1){
             routine.active().onTrue(
                 starttoR1.resetOdometry()
+                //go to first L4
                 .andThen(
                     new ParallelCommandGroup(
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
+                //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
             );
             if(preview){
                 updateField(starttoR1);
             }
         }
+        //by default a trough auto is created
         else {
             final AutoTrajectory starttoTrough = routine.trajectory(startChooser.getSelected() + "Trough");
             routine.active().onTrue(
                 starttoTrough.resetOdometry()
+                //go to trough location
                 .andThen(
                     new ParallelCommandGroup(
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L2),
                         elevator.new ChangeState(ElevatorState.L2),
                         new SequentialCommandGroup(starttoTrough.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                .andThen(new AutoOuttake(coralManipulator, elevator, true))
+                //outtake at trough speed to mitigate bouncing out
+                .andThen(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH))
             );
             if(preview){
                 updateField(starttoTrough);
@@ -159,6 +178,10 @@ public class AutoRoutines extends SubsystemBase{
         return routine;
     }
 
+    /**
+     * displays an autoroutine on smartdashboard
+     * @param trajectories the Choreo AutoTrajectories that make up the routine desired to be displayed
+     */
     public void updateField(AutoTrajectory... trajectories){
         trajectory = new edu.wpi.first.math.trajectory.Trajectory();
         for(int i = 0; i < trajectories.length; i++){
@@ -175,12 +198,15 @@ public class AutoRoutines extends SubsystemBase{
         SmartDashboard.putData("AutoTrajectory", field2d);
     }
 
+    @Override
     public void periodic(){
+        //check for updates to the SendableChoosers
         startChooser.onChange((s) -> startChooserUpdate());
         reef1Chooser.onChange((s) -> reef1ChooserUpdate());
         station1Chooser.onChange((s) -> station1ChooserUpdate());
         //reef2Chooser.onChange((s) -> reef2ChooserUpdate());
         //station2Chooser.onChange((s) -> station2ChooserUpdate());
+        //check for updates to the generate button
         generatePreview = SmartDashboard.getBoolean("generate", false);
         if(generatePreview){
             getRoutine(true);

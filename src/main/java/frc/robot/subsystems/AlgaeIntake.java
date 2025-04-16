@@ -23,7 +23,7 @@ public class AlgaeIntake extends SubsystemBase {
     }
 
     public void stopRoller() {
-        roller.set(0);
+        roller.stopMotor();
     }
     /**@param angle radians*/
     public void setIntakeAngle(double angle) {

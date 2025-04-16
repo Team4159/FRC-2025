@@ -24,6 +24,7 @@ import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.subsystems.AlgaeIntake;
+import frc.robot.commands.AutoAlgaeRemoval;
 import frc.robot.commands.AutoAlign;
 
 import frc.robot.generated.TunerConstants;
@@ -54,6 +55,7 @@ public class RobotContainer {
     private final Trigger forceVision = driveStick.button(13);
     private final Trigger autoAlignLeft = driveStick.button(11);
     private final Trigger autoAlignRight = driveStick.button(12);
+    private final Trigger autoAlgaeRemoval = driveStick.button(14);
 
     private final Trigger outtakeTrough = secondaryStick.button(10);
 
@@ -67,10 +69,10 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Deepclimb deepclimb = new Deepclimb();
     private final LED led = new LED();
+    public final Vision vision = new Vision(drivetrain);
 
     //simulation
     //private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, coralManipulatorPivot);
-    public final Vision vision = new Vision(drivetrain);
 
     /* Path follower */
     private final AutoFactory autoFactory;
@@ -88,8 +90,6 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.new Drive(driveStick)
@@ -102,6 +102,9 @@ public class RobotContainer {
 
         autoAlignLeft.whileTrue(new AutoAlign(drivetrain, led, true));
         autoAlignRight.whileTrue(new AutoAlign(drivetrain, led, false));
+        autoAlgaeRemoval.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
+
+        //autoAlignRight.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
         forceVision.whileTrue(new InstantCommand(() -> vision.forceVision()));
         driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
         driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));
@@ -113,8 +116,7 @@ public class RobotContainer {
         intake.whileTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.rainbow()),
             elevator.new ChangeState(ElevatorState.INTAKE),
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.INTAKE),
-            coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.INTAKE)))
+            coralManipulator.new ChangeState(CoralManipulatorPivotState.INTAKE, CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
         l2.onTrue(new ParallelCommandGroup(
@@ -130,12 +132,11 @@ public class RobotContainer {
             elevator.new ChangeState(ElevatorState.L4),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4)));
         AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3),
-            elevator.new ChangeState(ElevatorState.L3),
-            coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)));
+            coralManipulator.new ChangeState(CoralManipulatorPivotState.L3, CoralManipulatorRollerState.OUTTAKE),
+            elevator.new ChangeState(ElevatorState.L3)));
         AlgaeRemoval.onTrue(new ParallelCommandGroup(
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.ALGAEREMOVAL),
-            coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)));
+            coralManipulator.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, CoralManipulatorRollerState.OUTTAKE),
+            elevator.new ChangeState(ElevatorState.L3)));
 
         secondaryStick.button(12).whileTrue(
             new ParallelCommandGroup(

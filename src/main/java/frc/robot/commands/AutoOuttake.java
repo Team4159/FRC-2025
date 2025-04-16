@@ -48,7 +48,7 @@ public class AutoOuttake extends Command{
         if(!coralManipulator.hasCoral() && timeOffset == 0){
             timeOffset = Timer.getFPGATimestamp();
         }
-        return (!coralManipulator.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 1.5 )|| 
+        return (!coralManipulator.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 1.5)|| 
                (backupTimer && Timer.getFPGATimestamp() - backupTimeOffset > 2);
     }
 

@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -18,13 +17,6 @@ public class Deepclimb extends SubsystemBase{
     motor.set(speed);
 
   }
-  public void liftArm(double angle){
-    motor.getClosedLoopController().setReference(angle, ControlType.kPosition);
-  }
-
-  public void pivot(double speed){
-    
-  }
 
   public class ChangeState extends Command {
     private final Constants.Deepclimb.deepClimbStates selectedState;
@@ -33,7 +25,6 @@ public class Deepclimb extends SubsystemBase{
       addRequirements(Deepclimb.this); // use subsystem self as part of command
     }
   
-
     @Override
     public void initialize(){
       spin(selectedState.speed);

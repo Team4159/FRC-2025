@@ -45,7 +45,7 @@ public class AutoAlign extends AutoSwerve{
                 desiredPose = new Pose2d(closestSide.getX() + Constants.Field.middletoPole * Math.cos(angle), closestSide.getY() + Constants.Field.middletoPole * Math.sin(angle), closestSide.getRotation());
             }
             tooFar = false;
-            led.blink(Color.kYellow);
+            led.blink(Color.kYellow, 0.25);
             super.initialize();
         }
         else{
@@ -63,9 +63,9 @@ public class AutoAlign extends AutoSwerve{
     public boolean isFinished(){
         if(tooFar) return true;
         Pose2d swervePose = swerve.getState().Pose;
-        if(MathUtil.isNear(desiredPose.getX(), swervePose.getX(), 0.01)
-        && MathUtil.isNear(desiredPose.getY(), swervePose.getY(), 0.01)
-        && MathUtil.isNear(desiredPose.getRotation().getRadians(), swervePose.getRotation().getRadians(), Math.PI/64)){
+        if(MathUtil.isNear(desiredPose.getX(), swervePose.getX(), Constants.Swerve.translationTolerance)
+        && MathUtil.isNear(desiredPose.getY(), swervePose.getY(), Constants.Swerve.translationTolerance)
+        && MathUtil.isNear(desiredPose.getRotation().getRadians(), swervePose.getRotation().getRadians(), Constants.Swerve.rotationTolerance)){
             return true;
         }
         return false;
@@ -74,10 +74,10 @@ public class AutoAlign extends AutoSwerve{
     @Override
     public void end(boolean interrupted){
         if(tooFar){
-            led.blink(Color.kRed);
+            led.blink(Color.kRed, 0.25);
         }
         else{
-            led.blink(Color.kGreen);
+            led.blink(Color.kGreen, 0.25);
         }
     }
 }

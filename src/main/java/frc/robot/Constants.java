@@ -27,13 +27,21 @@ public class Constants {
         /** Units: meters */
         public static final double maxReefAutoAlignDistatnce = Units.inchesToMeters(120);
 
-        //autoaim
+        //autoaim (autocoral and autoalgaeremoval)
         public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.75, 0.5);
         public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(3, 3);
-        public static final ProfiledPIDController translationController = new ProfiledPIDController(2, 0.5, 0, translationConstraints);
+        /** ProfiledPIDController used for autoaim translation*/
+        //ki original 0.5
+        public static final ProfiledPIDController translationController = new ProfiledPIDController(2, 0.25, 0, translationConstraints);
+        /** ProfiledPIDController used for autoaim rotation*/
         public static final ProfiledPIDController rotationController = new ProfiledPIDController(7, 0.1, 0.1, rotationConstraints){{
             enableContinuousInput(-Math.PI, Math.PI);
         }};
+
+        /** Units: meters */
+        public static final double translationTolerance = 0.01;
+        /** Units radians */
+        public static final double rotationTolerance = Math.PI/64;
 
         public static final HolonomicDriveController holonomicController= new HolonomicDriveController(
             new PIDController(2, 0, 0),
@@ -43,10 +51,11 @@ public class Constants {
 
         /**TODO tune accel limiting after ballast added */
         public static final double maxAccelFullExtension = 2;
-        public static final double maxAccelFullRetraction = 8;
+        public static final double maxAccelFullRetraction = 6;
     }
 
     public static final class Deepclimb {
+        public static final int deviceID = 7;
         public static enum deepClimbStates {
             FORWARD(1),
             BACKWARD(-1);
@@ -58,11 +67,7 @@ public class Constants {
                 speed = s;
             }
         }
-        
-        
-        public static final double forwardSoftLimit = 10;
-        public static final int deviceID = 7;
-        public static final double reverseSoftLimit = 0;
+
     }
     
     public static final class Elevator{
@@ -207,6 +212,10 @@ public class Constants {
         /** Units: meters */
         public static final double middletoPole = Units.inchesToMeters(12.938/2);
         /** Units: meters */
+        public static final double autoAlgaeRemovalMidPoseDistance = Units.inchesToMeters(6);
+        /** Units: meters */
+        public static final double autoAlgaeRemovalFinalPoseDistance = -Units.inchesToMeters(2);
+        /** Units: meters */
         public static final double reefDistFromCenter = Units.inchesToMeters(168.692);
 
         public static final List<Pose2d> reefBlue = List.of(
@@ -245,16 +254,19 @@ public class Constants {
             new Pose2d(fieldLength/2 + Units.inchesToMeters(292.336) - (Swerve.width/2) * Math.sin(Units.degreesToRadians(35.899)), fieldWidth/2 + Units.inchesToMeters(147.622) - (Swerve.width/2) * Math.cos(Units.degreesToRadians(35.899)), new Rotation2d(Units.degreesToRadians(-90 - 35.899)))
         );
 
+        /** Map of reef Pose2ds corresponding to a DriverStation.Alliance */
         public static final Map<DriverStation.Alliance, List<Pose2d>> reef = Map.of(
             Alliance.Blue, reefBlue,
             Alliance.Red, reefRed
         );
 
+        /** Map of station Pose2ds corresponding to a DriverStation.Alliance */
         public static final Map<DriverStation.Alliance, List<Pose2d>> stations = Map.of(
             Alliance.Blue, coralStationsBlue,
             Alliance.Red, coralStationsRed
         );
 
+        /** Map of processor Pose2ds corresponding to a DriverStation.Alliance */
         public static final Map<DriverStation.Alliance, Pose2d> processors = Map.of(
             Alliance.Blue, new Pose2d(fieldLength/2 + Units.inchesToMeters(109.712), fieldWidth/2 + Units.inchesToMeters(158.455) - Constants.Swerve.width/2, new Rotation2d(-Math.PI/2)),
             Alliance.Red, new Pose2d(fieldLength/2 - Units.inchesToMeters(109.712), fieldWidth/2 - Units.inchesToMeters(158.455) + Constants.Swerve.width/2, new Rotation2d(Math.PI/2))

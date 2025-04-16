@@ -21,14 +21,15 @@ public class LED extends SubsystemBase {
         strip = new AddressableLED(3);
         buffer = new AddressableLEDBuffer(170);
         strip.setLength(buffer.getLength());
+        light(Color.kBlack);
     }
 
-    private void setLED(int r, int g, int b) {
-        for (int i = 0; i < buffer.getLength(); i++) {
-            buffer.setRGB(i, r, g, b);
-        }
-        strip.setData(buffer);
-    }
+    // private void setLED(int r, int g, int b) {
+    //     for (int i = 0; i < buffer.getLength(); i++) {
+    //         buffer.setRGB(i, r, g, b);
+    //     }
+    //     strip.setData(buffer);
+    // }
 
     public void light(Color color){
         pattern = LEDPattern.solid(color);
@@ -54,18 +55,16 @@ public class LED extends SubsystemBase {
     }
 
     public class LightLED extends Command{
-        private int r, g, b;
+        private Color color;
 
-        public LightLED(int r, int g, int b){
-            this.r = r;
-            this.g = g;
-            this.b = b;
+        public LightLED(Color color){
+            this.color = color;
             addRequirements(LED.this);
         }
 
         @Override
         public void initialize(){
-            LED.this.setLED(r, g, b);
+            LED.this.light(color);
         }
     }
 

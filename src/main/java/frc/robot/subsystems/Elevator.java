@@ -13,7 +13,6 @@ import frc.robot.Constants.Elevator.ElevatorState;
 
 public class Elevator extends SubsystemBase{
     private SparkFlex motor;
-
     private boolean zeroMode;
 
     //sim
@@ -68,6 +67,7 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putBoolean("limit switch", motor.getReverseLimitSwitch().isPressed());
     }
 
+    /** toggles zero mode, which lowers elevator at a constant percentage until it hits limit switch and then resets the relative encoder zero to there.*/
     public void toggleZeroElevator(){
         zeroMode = !zeroMode;
     }

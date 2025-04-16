@@ -81,6 +81,7 @@ public class CoralManipulator extends SubsystemBase {
         SmartDashboard.putBoolean("Coral", hasCoral());
     }
 
+    /** @return radians of manipulator angle */
     public double getAngle(){
         return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset;
     }
@@ -167,4 +168,24 @@ public class CoralManipulator extends SubsystemBase {
         }
     }
 
+    public class ChangeState extends Command{
+        private CoralManipulatorPivotState pivotState;
+        private CoralManipulatorRollerState rollerState;
+
+        public ChangeState(CoralManipulatorPivotState pivotState, CoralManipulatorRollerState rollerState){
+            this.pivotState = pivotState;
+            this.rollerState = rollerState;
+            addRequirements(CoralManipulator.this);
+        }
+
+        @Override public void initialize(){
+            CoralManipulator.this.setPivotGoalState(pivotState);
+            CoralManipulator.this.setRollerGoalState(rollerState);
+        }
+
+        @Override
+        public boolean isFinished(){
+            return MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
+        }
+    }
 }

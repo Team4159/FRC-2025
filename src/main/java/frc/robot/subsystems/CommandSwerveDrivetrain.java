@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import frc.robot.AdjustableSlewRateLimiter;
 import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
@@ -46,6 +47,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    /** Maximum acceleration allowed to prevent tipping.
+     * The maximum acceleration decreases linearly as the elevator extends due to higher center of gravity
+     */
     private double maxAccel;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -66,9 +70,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity 0.75 old value
 
+    /** Field Centric closed loop request for teleop driving */
     private final SwerveRequest.FieldCentric m_fieldCentricClosedLoopRequest = new SwerveRequest.FieldCentric()
     .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
     .withDriveRequestType(DriveRequestType.Velocity); // use closed loop control for drive motors
+    /** Robot relative request for manual robot relative align */
     private final SwerveRequest.ApplyRobotSpeeds m_driveApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     /* Swerve requests to apply during SysId characterization */
@@ -300,6 +306,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             pose.getRotation().getRadians(), sample.heading
         );
 
+        //log auto error to determine source of unreliability
+        SmartDashboard.putNumber("Auto X error", pose.getX() - sample.x);
+        SmartDashboard.putNumber("Auto Y error", pose.getY() - sample.y);
+        SmartDashboard.putNumber("Auto Theta error", pose.getRotation().getRadians() - sample.heading);
+
         setControl(
             m_pathApplyFieldSpeeds.withSpeeds(targetSpeeds)
                 .withWheelForceFeedforwardsX(sample.moduleForcesX())
@@ -334,6 +345,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         setControl(m_pathApplyFieldSpeeds.withSpeeds(new ChassisSpeeds()));
     }
 
+    /** calculates the closest reef pole to the robot */
     public void calculateClosestReef(){
         Translation2d reefTranslation;
         if(DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue))
@@ -433,7 +445,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         CommandJoystick joystick;
         /**
          * This command is for field-relative driving in teleop.
-         * It uses closed loop for control
+         * It uses closed loop for control.
          * @param joystick CommandJoystick to be used for driving the robot.
          */
         public Drive(CommandJoystick joystick){
@@ -443,6 +455,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         public void execute(){
             drive(-joystick.getY(), -joystick.getX(), -joystick.getZ());
+        }
+    }
+
+    public class DrivePS4 extends Command{
+        CommandPS4Controller commandPS4Controller;
+        /**
+         * This command is for field-relative driving in teleop.
+         * It uses closed loop for control.
+         * It is currently only used for at-home simulation.
+         * @param commandPS4Controller CommandPS4Controller used for driving the robot
+         */
+        public DrivePS4(CommandPS4Controller commandPS4Controller){
+            this.commandPS4Controller = commandPS4Controller;
+            addRequirements(CommandSwerveDrivetrain.this);
+        }
+
+        public void execute(){
+            drive(-commandPS4Controller.getRightY(), -commandPS4Controller.getRightX(), -commandPS4Controller.getLeftX());
         }
     }
 
