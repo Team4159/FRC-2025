@@ -6,6 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
@@ -63,30 +65,24 @@ public class AutoAlgaeRemoval extends AutoSwerve{
 
     @Override
     public void execute(){
-        System.out.println("executing");
         if(tooFar){
             return;
         }
         else if(beginningState){
-            System.out.println("beginning state");
             if(swerveAtGoal() && subsystemsAtGoal()){
                 beginningState = false;
+                desiredPose = finalPose;
             }
-        }
-        else{
-            desiredPose = finalPose;
-            System.out.println("final state");
         }
         super.execute();
     }
 
     @Override
     public boolean isFinished(){
-        return swerveAtGoal() && !beginningState;
+        return tooFar || swerveAtGoal() && !beginningState;
     }
 
     private boolean subsystemsAtGoal(){
-        if(tooFar) return true;
         if(MathUtil.isNear(elevator.getHeight(), ElevatorState.L2.height, 0.05)
         && MathUtil.isNear(coralManipulator.getAngle(), CoralManipulatorPivotState.L2.angle, 0.25)){
             return true;

@@ -135,7 +135,7 @@ public class CoralManipulator extends SubsystemBase {
 
         public ChangePivotState(CoralManipulatorPivotState desiredState){
             state = desiredState;
-            addRequirements(CoralManipulator.this);
+            //addRequirements(CoralManipulator.this);
         }
 
         @Override

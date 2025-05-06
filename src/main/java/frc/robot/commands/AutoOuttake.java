@@ -11,9 +11,10 @@ import frc.robot.subsystems.Elevator;
 public class AutoOuttake extends Command{
     private CoralManipulator coralManipulator;
     private Elevator elevator;
-    private boolean backupTimer, trough;
+    private boolean backupTimer, trough, usingTimer;
     private double backupTimeOffset;
     private double timeOffset;
+    private Timer timer;
 
     /** @param backupTimer will end the command automatically after a certain amout of time. used for auto*/
     public AutoOuttake(CoralManipulator coralManipulator, Elevator elevator, boolean backupTimer, boolean trough){
@@ -21,6 +22,8 @@ public class AutoOuttake extends Command{
         this.elevator = elevator;
         this.backupTimer = backupTimer;
         this.trough = trough;
+        timer = new Timer();
+        usingTimer = false;
         addRequirements(coralManipulator, elevator);
     }
 
@@ -41,19 +44,25 @@ public class AutoOuttake extends Command{
         }
         coralManipulator.setRollerGoalState(CoralManipulatorRollerState.OUTTAKE);
         backupTimeOffset = Timer.getFPGATimestamp();
+        usingTimer = false;
+        timer.stop();
+        timer.reset();
     }
 
     @Override
     public boolean isFinished(){
-        if(!coralManipulator.hasCoral() && timeOffset == 0){
-            timeOffset = Timer.getFPGATimestamp();
+        if(!coralManipulator.hasCoral()){
+            timer.start();
+            usingTimer = true;
         }
-        return (!coralManipulator.hasCoral() && Timer.getFPGATimestamp() - timeOffset > 1.5)|| 
+        System.out.println(usingTimer);
+        return (!coralManipulator.hasCoral() && usingTimer && timer.get() > 1.5)|| 
                (backupTimer && Timer.getFPGATimestamp() - backupTimeOffset > 2);
     }
 
     @Override
     public void end(boolean interrupted){
+        timer.stop();
         coralManipulator.setRollerGoalState(CoralManipulatorRollerState.PASSIVE);
         if(!interrupted){
             coralManipulator.setPivotGoalState(CoralManipulatorPivotState.INTAKE);

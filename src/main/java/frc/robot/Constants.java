@@ -44,8 +44,8 @@ public class Constants {
         public static final double rotationTolerance = Math.PI/64;
 
         public static final HolonomicDriveController holonomicController= new HolonomicDriveController(
-            new PIDController(2, 0, 0),
-            new PIDController(2, 0, 0),
+            new PIDController(5, 0, 0),
+            new PIDController(5, 0, 0),
             new ProfiledPIDController(5, 0, 0,
                     new TrapezoidProfile.Constraints(2, 2)));
 
@@ -214,7 +214,7 @@ public class Constants {
         /** Units: meters */
         public static final double autoAlgaeRemovalMidPoseDistance = Units.inchesToMeters(6);
         /** Units: meters */
-        public static final double autoAlgaeRemovalFinalPoseDistance = -Units.inchesToMeters(2);
+        public static final double autoAlgaeRemovalFinalPoseDistance = -Units.inchesToMeters(1);
         /** Units: meters */
         public static final double reefDistFromCenter = Units.inchesToMeters(168.692);
 

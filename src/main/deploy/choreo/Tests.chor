@@ -4,6 +4,13 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
+   "alignMaxV":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"0.75 m / s",
+     "val":0.75
+    }
+   },
    "bumperthickness":{
     "dimension":"Length",
     "var":{
@@ -28,8 +35,8 @@
    "offset":{
     "dimension":"Length",
     "var":{
-     "exp":"1 in",
-     "val":0.0254
+     "exp":"2 in",
+     "val":0.0508
     }
    }
   },
@@ -40,8 +47,8 @@
      "val":7.228899999999999
     },
     "y":{
-     "exp":"7.62 m",
-     "val":7.62
+     "exp":"5.6 m",
+     "val":5.6
     },
     "heading":{
      "exp":"180 deg",
@@ -68,8 +75,8 @@
      "val":7.228899999999999
     },
     "y":{
-     "exp":"0.42 m",
-     "val":0.42
+     "exp":"2.46 m",
+     "val":2.46
     },
     "heading":{
      "exp":"MM.heading",
@@ -79,7 +86,7 @@
    "RA":{
     "x":{
      "exp":"3.218 m - offset",
-     "val":3.1926
+     "val":3.1672
     },
     "y":{
      "exp":"4.19 m",
@@ -93,7 +100,7 @@
    "RB":{
     "x":{
      "exp":"3.218 m - offset",
-     "val":3.1926
+     "val":3.1672
     },
     "y":{
      "exp":"3.86 m",
@@ -107,11 +114,11 @@
    "RC":{
     "x":{
      "exp":"3.71 m - offset * cos(60 deg)",
-     "val":3.6973
+     "val":3.6846
     },
     "y":{
      "exp":"3.007 m - offset * sin(60 deg)",
-     "val":2.9850029547438752
+     "val":2.9630059094877508
     },
     "heading":{
      "exp":"60 deg",
@@ -121,11 +128,11 @@
    "RD":{
     "x":{
      "exp":"3.996 m - offset * cos(60 deg)",
-     "val":3.9833
+     "val":3.9706
     },
     "y":{
      "exp":"2.842 m - offset * sin(60 deg)",
-     "val":2.820002954743875
+     "val":2.7980059094877507
     },
     "heading":{
      "exp":"60 deg",
@@ -135,11 +142,11 @@
    "RE":{
     "x":{
      "exp":"4.981 m + offset * cos(60 deg)",
-     "val":4.9937
+     "val":5.0064
     },
     "y":{
      "exp":"2.842 m - offset * sin(60 deg)",
-     "val":2.820002954743875
+     "val":2.7980059094877507
     },
     "heading":{
      "exp":"120 deg",
@@ -149,11 +156,11 @@
    "RF":{
     "x":{
      "exp":"5.267 m + offset * cos(60 deg)",
-     "val":5.2797
+     "val":5.292400000000001
     },
     "y":{
      "exp":"3.007 m - offset * sin(60 deg)",
-     "val":2.9850029547438752
+     "val":2.9630059094877508
     },
     "heading":{
      "exp":"120 deg",
@@ -163,7 +170,7 @@
    "RG":{
     "x":{
      "exp":"5.76 m + offset",
-     "val":5.7854
+     "val":5.8107999999999995
     },
     "y":{
      "exp":"3.86 m",
@@ -177,7 +184,7 @@
    "RH":{
     "x":{
      "exp":"5.76 m + offset",
-     "val":5.7854
+     "val":5.8107999999999995
     },
     "y":{
      "exp":"4.19 m",
@@ -191,11 +198,11 @@
    "RI":{
     "x":{
      "exp":"5.268 m + offset * cos(60 deg)",
-     "val":5.2806999999999995
+     "val":5.2934
     },
     "y":{
      "exp":"5.045 m + offset * cos(30 deg)",
-     "val":5.066997045256125
+     "val":5.08899409051225
     },
     "heading":{
      "exp":"240 deg",
@@ -205,11 +212,11 @@
    "RJ":{
     "x":{
      "exp":"4.981 m + offset * cos(60 deg)",
-     "val":4.9937
+     "val":5.0064
     },
     "y":{
      "exp":"5.209 m + offset * sin(60 deg)",
-     "val":5.2309970452561245
+     "val":5.252994090512249
     },
     "heading":{
      "exp":"240 deg",
@@ -219,11 +226,11 @@
    "RK":{
     "x":{
      "exp":"3.996 m - offset * cos(60 deg)",
-     "val":3.9833
+     "val":3.9706
     },
     "y":{
      "exp":"5.209 m + offset * sin(60 deg)",
-     "val":5.2309970452561245
+     "val":5.252994090512249
     },
     "heading":{
      "exp":"300 deg",
@@ -233,11 +240,11 @@
    "RL":{
     "x":{
      "exp":"3.71 m - offset * cos(60 deg)",
-     "val":3.6973
+     "val":3.6846
     },
     "y":{
      "exp":"5.045 m + offset * sin(60 deg)",
-     "val":5.066997045256125
+     "val":5.08899409051225
     },
     "heading":{
      "exp":"300 deg",
@@ -336,8 +343,8 @@
    "val":6.75
   },
   "radius":{
-   "exp":"1.95 in",
-   "val":0.04953
+   "exp":"2 in",
+   "val":0.0508
   },
   "vmax":{
    "exp":"485.89966375522135 rad / s",

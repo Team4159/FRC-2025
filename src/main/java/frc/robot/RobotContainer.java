@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LED;
@@ -43,6 +44,7 @@ public class RobotContainer {
     //joysticks
     private final CommandJoystick driveStick = new CommandJoystick(0);
     private final CommandJoystick secondaryStick = new CommandJoystick(1);
+    private final CommandPS4Controller ps4Controller = new CommandPS4Controller(2);
 
     //triggers
     private final Trigger outtake = secondaryStick.button(1);
@@ -53,9 +55,9 @@ public class RobotContainer {
     private final Trigger l3 = secondaryStick.button(6);
     private final Trigger l4 = secondaryStick.button(7);
     private final Trigger forceVision = driveStick.button(13);
-    private final Trigger autoAlignLeft = driveStick.button(11);
-    private final Trigger autoAlignRight = driveStick.button(12);
-    private final Trigger autoAlgaeRemoval = driveStick.button(14);
+    private final Trigger autoAlignLeft = driveStick.button(11).or(ps4Controller.square());
+    private final Trigger autoAlignRight = driveStick.button(12).or(ps4Controller.circle());
+    private final Trigger autoAlgaeRemoval = driveStick.button(14).or(ps4Controller.L1());
 
     private final Trigger outtakeTrough = secondaryStick.button(10);
 
@@ -93,6 +95,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.new Drive(driveStick)
+            //SIM ONLY
+            //drivetrain.new DrivePS4(ps4Controller)
         );
 
         driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(0.15, 0));

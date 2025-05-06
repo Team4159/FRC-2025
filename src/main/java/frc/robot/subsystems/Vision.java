@@ -67,15 +67,15 @@ public class Vision extends SubsystemBase{
             visionData = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
             visionPose = new Pose2d(visionData[0], visionData[1], new Rotation2d(Units.degreesToRadians(visionData[5])));
         }
-        else if(area >= 0.8){
-            SmartDashboard.putBoolean("mt1", false);
-            if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
-                visionPose = new Pose2d();
-                return;
-            }
-            visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
-            visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
-        }
+        // else if(area >= 0.8){
+        //     SmartDashboard.putBoolean("mt1", false);
+        //     if(!limelight.getEntry("botpose_orb_wpiblue").exists()){
+        //         visionPose = new Pose2d();
+        //         return;
+        //     }
+        //     visionData = limelight.getEntry("botpose_orb_wpiblue").getDoubleArray(new double[6]);
+        //     visionPose = new Pose2d(visionData[0], visionData[1], drivetrain.getState().Pose.getRotation());
+        // }
         else{
             SmartDashboard.putBoolean("mt1", false);
             visionPose = new Pose2d();

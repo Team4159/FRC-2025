@@ -59,12 +59,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    /** Swerve request to apply during field-centric path following */
-    private final SwerveRequest.ApplyFieldSpeeds m_pathApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+    /** Swerve request to apply during field-centric path following 
+     * closed loop control
+    */
+    private final SwerveRequest.ApplyFieldSpeeds m_pathApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds().withDriveRequestType(DriveRequestType.Velocity);
     //private final SwerveRequest.ApplyFieldSpeeds m_driveApplyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
-    private final PIDController m_pathXController = new PIDController(3, 0, 0);
-    private final PIDController m_pathYController = new PIDController(3, 0, 0);
-    private final PIDController m_pathThetaController = new PIDController(5, 0, 0);
+    private final PIDController m_pathXController = new PIDController(2, 0, 0);
+    private final PIDController m_pathYController = new PIDController(2, 0, 0);
+    private final PIDController m_pathThetaController = new PIDController(4, 0, 0);
 
     //private double desiredYaw;
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed

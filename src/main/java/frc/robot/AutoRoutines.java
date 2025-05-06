@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
+import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoOuttake;
 import frc.robot.subsystems.CoralManipulator;
@@ -73,6 +74,7 @@ public class AutoRoutines extends SubsystemBase{
         final AutoRoutine routine = m_factory.newRoutine("routine");
         final String start = startChooser.getSelected();
         final String s1 = station1Chooser.getSelected();
+        boolean isleft1 = false, isleft2 = false;
         //final String s2 = station2Chooser.getSelected();git d
         if(start == null || reef1Chooser.getSelected() == null || s1 == null || reef2Chooser.getSelected() == null){
             System.out.println("null values");
@@ -81,6 +83,12 @@ public class AutoRoutines extends SubsystemBase{
 
         final String r1 = reef1Chooser.getSelected().substring(0, 2);
         final String r2 = reef2Chooser.getSelected().substring(0, 2);
+        if(r1.equals("RA") ||r1.equals("RC") || r1.equals("RE") || r1.equals("RG") || r1.equals("RI") || r1.equals("RK")){
+            isleft1 = true;
+        }
+        if(r2.equals("RA") ||r2.equals("RC") || r2.equals("RE") || r2.equals("RG") || r2.equals("RI") || r2.equals("RK")){
+            isleft2 = true;
+        }
         //final String r3 = reef3Chooser.getSelected().substring(0, 2);
 
         final AutoTrajectory starttoR1 = routine.trajectory(start + "to" + r1);
@@ -99,7 +107,9 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                //score
+                //align
+                //.andThen(new AutoAlign(swerve, led, isleft1))
+                //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
                 //go to first station
                 .andThen(new SequentialCommandGroup(R1toS1.cmd(), new InstantCommand(() -> swerve.stopSwerve())))
@@ -111,8 +121,10 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(S1toR2.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
+                //align
+                //.andThen(new AutoAlign(swerve, led, isleft2))
                 //outtake
-                .andThen(new AutoOuttake(coralManipulator, elevator, true, true))
+                .andThen(new AutoOuttake(coralManipulator, elevator, true))
                 //3 coral probably never to be used :(
                 // .andThen(new SequentialCommandGroup(R2toS2.cmd(), new InstantCommand(() -> swerve.stopSwerve())))
                 // .andThen(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, led))
@@ -139,8 +151,10 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
+                //align
+                //.andThen(new AutoAlign(swerve, led, isleft1))
                 //outtake
-                .andThen(new AutoOuttake(coralManipulator, elevator, true))
+                .andThen(new AutoOuttake(coralManipulator, elevator, false))
             );
             if(preview){
                 updateField(starttoR1);
