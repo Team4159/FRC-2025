@@ -4,6 +4,13 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
+   "alignAccel":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"2.5 m / s ^ 2",
+     "val":2.5
+    }
+   },
    "alignMaxV":{
     "dimension":"LinVel",
     "var":{
@@ -21,8 +28,8 @@
    "coralAccel":{
     "dimension":"LinAcc",
     "var":{
-     "exp":"2.5 m / s ^ 2",
-     "val":2.5
+     "exp":"3.5 m / s ^ 2",
+     "val":3.5
     }
    },
    "noCoralAccel":{
