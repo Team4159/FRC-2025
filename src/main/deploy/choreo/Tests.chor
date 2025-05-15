@@ -21,15 +21,15 @@
    "coralAccel":{
     "dimension":"LinAcc",
     "var":{
-     "exp":"2 m / s ^ 2",
-     "val":2.0
+     "exp":"2.5 m / s ^ 2",
+     "val":2.5
     }
    },
    "noCoralAccel":{
     "dimension":"LinAcc",
     "var":{
-     "exp":"2 m / s ^ 2",
-     "val":2.0
+     "exp":"2.5 m / s ^ 2",
+     "val":2.5
     }
    },
    "offset":{

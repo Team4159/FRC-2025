@@ -83,7 +83,7 @@ public class CoralManipulator extends SubsystemBase {
 
     /** @return radians of manipulator angle */
     public double getAngle(){
-        return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset;
+        return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset - Math.PI/3;
     }
 
     public boolean hasCoral(){

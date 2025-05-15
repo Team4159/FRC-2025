@@ -74,7 +74,7 @@ public class Constants {
         public static final int elevatorMotorID = 6;
         public static final int limitSwitchPort = 0;
 
-        public static final double elevatorGearing = 25;
+        public static final double elevatorGearing = 20;
         public static final double elevatorWeightKG = Units.lbsToKilograms(20);
         public static final double spoolDiameter = Units.inchesToMeters(1.273);
         public static final double maxHeight = Units.inchesToMeters(21);
@@ -84,9 +84,9 @@ public class Constants {
 
         public static final double kS = 0.15;
         //factors in cf spring
-        public static final double kG = 0.04;//0.09 * 1.6;
-        public static final double kV = 26.12;//26.12 * 1.6;//15.67/12;
-        public static final double kA = 0.01;//0.02 * 1.6;//0.07/12;
+        public static final double kG = 0.39;//0.09 * 1.6;
+        public static final double kV = 20.46;//26.12 * 1.6;//15.67/12;
+        public static final double kA = 0.06;//0.02 * 1.6;//0.07/12;
         
         public static final ElevatorFeedforward elevatorFF = new ElevatorFeedforward(kS, kG, kV, kA);
 
@@ -125,21 +125,21 @@ public class Constants {
         public static final double lengthMeters = 0.405;
 
         public static final double kSEmpty = 0;
-        public static final double kGEmpty = 0.3;//0.34;//0.8/12;//1.45/12;//2.45/12;
-        public static final double kVEmpty = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
-        public static final double kAEmpty = 0.02;//0.03/12;//0.05/12;//0.15/12;
+        public static final double kGEmpty = 0.23;//0.3;
+        public static final double kVEmpty = 1.01*0.8;
+        public static final double kAEmpty = 0.01;
 
         public static final double kSCoral = 0;
-        public static final double kGCoral = 0.35;//0.34;//0.8/12;//1.45/12;//2.45/12;
-        public static final double kVCoral = 1.01*3/4;//1.01*2/3;//0.76/12;//0.42/12;//0.08/12;
-        public static final double kACoral = 0.02;//0.03/12;//0.05/12;//0.15/12;
+        public static final double kGCoral = 0.28;
+        public static final double kVCoral = 1.01*0.8;
+        public static final double kACoral = 0.01;
 
         public static final ArmFeedforward angleFFEmpty = new ArmFeedforward(kSEmpty, kGEmpty, kVEmpty, kAEmpty);
         public static final ArmFeedforward angleFFCoral = new ArmFeedforward(kSCoral, kGCoral, kVCoral, kACoral);
 
-        public static final double kP = 3.5;
-        public static final double kI = 0;
-        public static final double kD = 0.04;
+        public static final double kP = 2;
+        public static final double kI = 0.00017;
+        public static final double kD = 0;
         public static final double maxVelocity = 10;
         public static final double maxAcceleration = 8;
 
