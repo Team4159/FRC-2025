@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
-import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoIntake;
 import frc.robot.commands.AutoOuttake;
 import frc.robot.subsystems.CoralManipulator;
@@ -101,14 +100,13 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                //align
-                //.andThen(new AutoAlign(swerve, led, isleft1))
-                //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
                 //go to first station
                 .andThen(
                     new ParallelCommandGroup(
+                        //go to first station
                         new SequentialCommandGroup(R1toS1.cmd(), new InstantCommand(() -> swerve.stopSwerve())),
+                        //lower elevator
                         new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE))))
                 //intake
                 .andThen(new AutoIntake(coralManipulator, elevator, led))
@@ -118,28 +116,17 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(S1toR2.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                //align
-                //.andThen(new AutoAlign(swerve, led, isleft2))
                 //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
+                //lower elevator
                 .andThen(new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE)))
-                //3 coral probably never to be used :(
-                // .andThen(new SequentialCommandGroup(R2toS2.cmd(), new InstantCommand(() -> swerve.stopSwerve())))
-                // .andThen(new AutoIntake(coralManipulatorPivot, coralManipulatorRoller, elevator, led))
-                // .andThen(
-                //     new ParallelCommandGroup(
-                //         //coralManipulatorPivot.new ChangeState(CoralManipulatorPivotState.L4, false),
-                //         //elevator.new ChangeState(ElevatorState.L4, false),
-                //         new SequentialCommandGroup(S2toR3.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                // .andThen(new InstantCommand(() -> swerve.stopSwerve()))
-                // .andThen(new AutoOuttake(coralManipulatorPivot, coralManipulatorRoller, elevator, true))
             );
             if(preview){
                 //update smartdashboard preview
                 updateField(starttoR1, R1toS1, S1toR2);
             }
         }
-        //3 coral???
+        //3 coral??? (type 3)
         else if(typeChooser.getSelected() == 3){
             routine.active().onTrue(
                 starttoR1.resetOdometry()
@@ -156,7 +143,9 @@ public class AutoRoutines extends SubsystemBase{
                 //go to first station
                 .andThen(
                     new ParallelCommandGroup(
+                        //go to first station
                         new SequentialCommandGroup(R1toS1.cmd(), new InstantCommand(() -> swerve.stopSwerve())),
+                        //lower elevator
                         new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE))))
                 //intake
                 .andThen(new AutoIntake(coralManipulator, elevator, led))
@@ -166,14 +155,14 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(S1toR2.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                //align
-                //.andThen(new AutoAlign(swerve, led, isleft2))
                 //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
                 //go to second station
                 .andThen(
                     new ParallelCommandGroup(
+                        //go to second station
                         new SequentialCommandGroup(R2toS2.cmd(), new InstantCommand(() -> swerve.stopSwerve())),
+                        //lower elevator
                         new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE))))
                 //intake
                 .andThen(new AutoIntake(coralManipulator, elevator, led))
@@ -183,10 +172,9 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(S2toR3.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                //align
-                //.andThen(new AutoAlign(swerve, led, isleft2))
                 //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, true))
+                //lower elevator
                 .andThen(new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE)))
             );
             if(preview){
@@ -194,7 +182,7 @@ public class AutoRoutines extends SubsystemBase{
                 updateField(starttoR1, R1toS1, S1toR2, R2toS2, S2toR3);
             }
         }
-        //a type of 2 corresponds to a 1 coral auto
+        //a type of 1 corresponds to a 1 coral
         else if(typeChooser.getSelected() == 1){
             routine.active().onTrue(
                 starttoR1.resetOdometry()
@@ -204,10 +192,9 @@ public class AutoRoutines extends SubsystemBase{
                         coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4),
                         elevator.new ChangeState(ElevatorState.L4),
                         new SequentialCommandGroup(starttoR1.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
-                //align
-                //.andThen(new AutoAlign(swerve, led, isleft1))
                 //outtake
                 .andThen(new AutoOuttake(coralManipulator, elevator, false))
+                //lower elevator
                 .andThen(new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE)))
             );
             if(preview){
@@ -227,6 +214,7 @@ public class AutoRoutines extends SubsystemBase{
                         new SequentialCommandGroup(starttoTrough.cmd(), new InstantCommand(() -> swerve.stopSwerve()))))
                 //outtake at trough speed to mitigate bouncing out
                 .andThen(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH))
+                //lower elevator
                 .andThen(new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE)))
             );
             if(preview){
@@ -291,8 +279,8 @@ public class AutoRoutines extends SubsystemBase{
         typeChooser = new SendableChooser<Integer>();
         typeChooser.addOption("Trough", 0);
         typeChooser.addOption("1CL4", 1);
-        typeChooser.addOption("3CL4", 3);
-        typeChooser.setDefaultOption("2CL4", 2);
+        typeChooser.addOption("2CL4", 2);
+        typeChooser.setDefaultOption("3CL4", 3);
         startChooser = new SendableChooser<String>();
         startChooser.addOption("Right", "MR");
         startChooser.addOption("Mid", "MM");
