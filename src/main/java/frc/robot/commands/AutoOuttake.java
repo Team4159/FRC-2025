@@ -56,7 +56,7 @@ public class AutoOuttake extends Command{
             usingTimer = true;
         }
         System.out.println(usingTimer);
-        return (!coralManipulator.hasCoral() && usingTimer && timer.get() > 1)|| 
+        return (!coralManipulator.hasCoral() && usingTimer && timer.get() > 0.75)|| 
                (backupTimer && Timer.getFPGATimestamp() - backupTimeOffset > 2);
     }
 
