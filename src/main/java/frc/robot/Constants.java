@@ -156,7 +156,7 @@ public class Constants {
             ALGAEREMOVAL(Units.degreesToRadians(150)),
             TROUGH(Units.degreesToRadians(200)),
             L2(Units.degreesToRadians(200)),
-            L3(Units.degreesToRadians(190)),
+            L3(Units.degreesToRadians(182)),
             L4(Units.degreesToRadians(196));
 
             public double angle;
