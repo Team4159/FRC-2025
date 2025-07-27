@@ -155,6 +155,7 @@ public class Constants {
             INTAKE(Units.degreesToRadians(0)),
             ALGAEREMOVAL(Units.degreesToRadians(150)),
             TROUGH(Units.degreesToRadians(200)),
+            L1(Units.degreesToRadians(150)),
             L2(Units.degreesToRadians(200)),
             L3(Units.degreesToRadians(182)),
             L4(Units.degreesToRadians(196));

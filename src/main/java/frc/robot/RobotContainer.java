@@ -49,8 +49,9 @@ public class RobotContainer {
     //triggers
     private final Trigger outtake = secondaryStick.button(1);
     private final Trigger intake = secondaryStick.button(2);
-    private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
+    //private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
     private final Trigger AlgaeRemoval = secondaryStick.button(9);
+    private final Trigger l1 = secondaryStick.button(8);
     private final Trigger l2 = secondaryStick.button(5);
     private final Trigger l3 = secondaryStick.button(6);
     private final Trigger l4 = secondaryStick.button(7);
@@ -123,6 +124,10 @@ public class RobotContainer {
             coralManipulator.new ChangeState(CoralManipulatorPivotState.INTAKE, CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
+        l1.onTrue(new ParallelCommandGroup(
+            new InstantCommand(() -> led.light(Color.kGreen)),
+            elevator.new ChangeState(ElevatorState.L1),
+            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L1)));
         l2.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L2),
@@ -135,9 +140,9 @@ public class RobotContainer {
             new InstantCommand(() -> led.light(Color.kPurple)),
             elevator.new ChangeState(ElevatorState.L4),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4)));
-        AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
-            coralManipulator.new ChangeState(CoralManipulatorPivotState.L3, CoralManipulatorRollerState.OUTTAKE),
-            elevator.new ChangeState(ElevatorState.L3)));
+        // AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
+        //     coralManipulator.new ChangeState(CoralManipulatorPivotState.L3, CoralManipulatorRollerState.OUTTAKE),
+        //     elevator.new ChangeState(ElevatorState.L3)));
         AlgaeRemoval.onTrue(new ParallelCommandGroup(
             coralManipulator.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, CoralManipulatorRollerState.OUTTAKE),
             elevator.new ChangeState(ElevatorState.L3)));
