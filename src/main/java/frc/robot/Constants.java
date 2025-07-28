@@ -182,7 +182,7 @@ public class Constants {
     public static final class AlgaeIntake {
         public static final int rollerID = 3, pivotID = 2;
 
-        public static final double kP = 0.3;
+        public static final double kP = 1;
         public static final double kI = 0;
         public static final double kD = 0;
 
@@ -191,9 +191,12 @@ public class Constants {
         }};
 
         public static enum AlgaeIntakeState {
-            STOW(1.85, 0),
-            INTAKE(0.5, 1),
-            OUTTAKE(0.7, -1);
+            // STOW(1.85, 0),
+            // INTAKE(0.5, 1),
+            // OUTTAKE(0.7, -1);
+            STOW(1, 0),
+            INTAKE(0.7, 1),
+            OUTTAKE(0.8, -1);
             public final double speed;
             public final double angle;
             private AlgaeIntakeState(double a, double s) {
