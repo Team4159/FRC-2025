@@ -53,7 +53,7 @@ public class RobotContainer {
     //driver auto functions
     private final Trigger autoAlignLeftTrigger = driveController.leftBumper();//driveStick.button(11).or(ps4Controller.square());
     private final Trigger autoAlignRightTrigger = driveController.rightBumper();//driveStick.button(12).or(ps4Controller.circle());
-    private final Trigger autoAlgaeRemovalTrigger = driveController.rightTrigger();//.button(14).or(ps4Controller.L1());
+    private final Trigger autoAlgaeRemovalTrigger = driveController.rightTrigger(0.1);//.button(14).or(ps4Controller.L1());
 
     //driver manual robot relative align
     private final Trigger manualAlignLeft = driveController.povLeft();
