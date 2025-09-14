@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.AdjustableSlewRateLimiter;
 import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
@@ -443,20 +444,38 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    public class Drive extends Command{
+    public class DriveJoystick extends Command{
         CommandJoystick joystick;
         /**
          * This command is for field-relative driving in teleop.
          * It uses closed loop for control.
          * @param joystick CommandJoystick to be used for driving the robot.
          */
-        public Drive(CommandJoystick joystick){
+        public DriveJoystick(CommandJoystick joystick){
             this.joystick = joystick;
             addRequirements(CommandSwerveDrivetrain.this);
         }
 
         public void execute(){
             drive(-joystick.getY(), -joystick.getX(), -joystick.getZ());
+        }
+    }
+
+    public class DriveXbox extends Command{
+        CommandXboxController commandXboxController;
+        /**
+         * This command is for field-relative driving in teleop.
+         * It uses closed loop for control.
+         * It is currently only used for at-home simulation.
+         * @param commandPS4Controller CommandPS4Controller used for driving the robot
+         */
+        public DriveXbox(CommandXboxController commandXboxController){
+            this.commandXboxController = commandXboxController;
+            addRequirements(CommandSwerveDrivetrain.this);
+        }
+
+        public void execute(){
+            drive(-commandXboxController.getLeftY(), -commandXboxController.getLeftX(), -commandXboxController.getRightX());
         }
     }
 

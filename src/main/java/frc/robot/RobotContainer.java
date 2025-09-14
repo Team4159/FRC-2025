@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LED;
@@ -41,31 +42,49 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    //joysticks
-    private final CommandJoystick driveStick = new CommandJoystick(0);
-    private final CommandJoystick secondaryStick = new CommandJoystick(1);
+    //controllers
+    //private final CommandJoystick driveStick = new CommandJoystick(0);
+    //private final CommandJoystick secondaryStick = new CommandJoystick(1);
+    private final CommandXboxController driveController = new CommandXboxController(0);
+    private final CommandXboxController secondaryController = new CommandXboxController(1);
     private final CommandPS4Controller ps4Controller = new CommandPS4Controller(2);
 
     //triggers
-    private final Trigger outtake = secondaryStick.button(1);
-    private final Trigger intake = secondaryStick.button(2);
+    //driver auto functions
+    private final Trigger autoAlignLeftTrigger = driveController.leftBumper();//driveStick.button(11).or(ps4Controller.square());
+    private final Trigger autoAlignRightTrigger = driveController.rightBumper();//driveStick.button(12).or(ps4Controller.circle());
+    private final Trigger autoAlgaeRemovalTrigger = driveController.rightTrigger();//.button(14).or(ps4Controller.L1());
+
+    //driver manual robot relative align
+    private final Trigger manualAlignLeft = driveController.povLeft();
+    private final Trigger manualAlignDown = driveController.povDown();
+    private final Trigger manualAlignRight = driveController.povRight();
+    private final Trigger manualAlignUp = driveController.povUp();
+
+    //driver util
+    private final Trigger forceVisionTrigger = driveController.x();//driveStick.button(13);
+    private final Trigger zeroTrigger = driveController.a();
+    private final Trigger brakeTrigger = driveController.b();
+
+    //coral
+    private final Trigger outtakeTrigger = secondaryController.rightBumper();//secondaryStick.button(1);
+    private final Trigger intakeTrigger = secondaryController.rightTrigger(0.1);//secondaryStick.button(2);
+    private final Trigger outtakeTroughTrigger = secondaryController.povUp();//secondaryStick.button(10);
+    private final Trigger AlgaeRemovalTrigger = secondaryController.x();//secondaryStick.button(9);
+    private final Trigger l1Trigger = secondaryController.povLeft();//secondaryStick.button(8);
+    private final Trigger l2Trigger = secondaryController.b();//secondaryStick.button(5);
+    private final Trigger l3Trigger = secondaryController.a();//secondaryStick.button(6);
+    private final Trigger l4Trigger = secondaryController.y();//secondaryStick.button(7);
     //private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
-    private final Trigger AlgaeRemoval = secondaryStick.button(9);
-    private final Trigger l1 = secondaryStick.button(8);
-    private final Trigger l2 = secondaryStick.button(5);
-    private final Trigger l3 = secondaryStick.button(6);
-    private final Trigger l4 = secondaryStick.button(7);
-    private final Trigger forceVision = driveStick.button(13);
-    private final Trigger autoAlignLeft = driveStick.button(11).or(ps4Controller.square());
-    private final Trigger autoAlignRight = driveStick.button(12).or(ps4Controller.circle());
-    private final Trigger autoAlgaeRemoval = driveStick.button(14).or(ps4Controller.L1());
 
-    private final Trigger outtakeTrough = secondaryStick.button(10);
+    //algae
+    private final Trigger intakeAlgaeTrigger = secondaryController.leftTrigger(0.1);
+    private final Trigger outtakeAlgaeTrigger = secondaryController.leftBumper();
 
-    private final Trigger zeroELevator = secondaryStick.button(16);
+    //util
+    private final Trigger zeroElevatorTrigger = secondaryController.povDown();//secondaryStick.button(16);
 
     //subsystems
-
     private final AlgaeIntake algaeIntake = new AlgaeIntake();
     private final Elevator elevator = new Elevator();
     private final CoralManipulator coralManipulator = new CoralManipulator();
@@ -93,79 +112,89 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        //teleop drive command
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.new Drive(driveStick)
+            //drivetrain.new DriveJoystick(driveStick)
+            drivetrain.new DriveXbox(driveController)
             //SIM ONLY
             //drivetrain.new DrivePS4(ps4Controller)
         );
 
-        driveStick.pov(0).whileTrue(drivetrain.new ManualAlign(0.15, 0));
-        driveStick.pov(90).whileTrue(drivetrain.new ManualAlign(0, -0.15));
-        driveStick.pov(180).whileTrue(drivetrain.new ManualAlign(-0.15, 0));
-        driveStick.pov(270).whileTrue(drivetrain.new ManualAlign(0, 0.15));
+        //button bindings
+        //driver auto
+        autoAlignLeftTrigger.whileTrue(new AutoAlign(drivetrain, led, true));
+        autoAlignRightTrigger.whileTrue(new AutoAlign(drivetrain, led, false));
+        autoAlgaeRemovalTrigger.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
 
-        autoAlignLeft.whileTrue(new AutoAlign(drivetrain, led, true));
-        autoAlignRight.whileTrue(new AutoAlign(drivetrain, led, false));
-        autoAlgaeRemoval.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
+        //driver manual robot relative
+        manualAlignLeft.whileTrue(drivetrain.new ManualAlign(-0.15, 0));
+        manualAlignDown.whileTrue(drivetrain.new ManualAlign(0, -0.15));
+        manualAlignRight.whileTrue(drivetrain.new ManualAlign(0.15, 0));
+        manualAlignUp.whileTrue(drivetrain.new ManualAlign(0, 0.15));
 
-        //autoAlignRight.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
-        forceVision.whileTrue(new InstantCommand(() -> vision.forceVision()));
-        driveStick.button(1).onTrue(new InstantCommand(() -> drivetrain.zero()));
-        driveStick.button(2).whileTrue(drivetrain.applyRequest(() -> brake));
+        //driver util
+        forceVisionTrigger.whileTrue(new InstantCommand(() -> vision.forceVision()));
+        zeroTrigger.onTrue(new InstantCommand(() -> drivetrain.zero()));
+        brakeTrigger.whileTrue(drivetrain.applyRequest(() -> brake));
 
+        //drivetrain logging
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        outtake.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
-        outtakeTrough.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
-        intake.whileTrue(new ParallelCommandGroup(
+        //coral
+        outtakeTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
+        outtakeTroughTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
+        intakeTrigger.whileTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.rainbow()),
             elevator.new ChangeState(ElevatorState.INTAKE),
             coralManipulator.new ChangeState(CoralManipulatorPivotState.INTAKE, CoralManipulatorRollerState.INTAKE)))
             .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
-        l1.onTrue(new ParallelCommandGroup(
+        l1Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L1),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L1)));
-        l2.onTrue(new ParallelCommandGroup(
+        l2Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L2),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L2)));
-        l3.onTrue(new ParallelCommandGroup(
+        l3Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kBlue)),
             elevator.new ChangeState(ElevatorState.L3),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3)));
-        l4.onTrue(new ParallelCommandGroup(
+        l4Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
             elevator.new ChangeState(ElevatorState.L4),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4)));
         // AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
         //     coralManipulator.new ChangeState(CoralManipulatorPivotState.L3, CoralManipulatorRollerState.OUTTAKE),
         //     elevator.new ChangeState(ElevatorState.L3)));
-        AlgaeRemoval.onTrue(new ParallelCommandGroup(
+        AlgaeRemovalTrigger.onTrue(new ParallelCommandGroup(
             coralManipulator.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, CoralManipulatorRollerState.OUTTAKE),
             elevator.new ChangeState(ElevatorState.L3)));
 
-        secondaryStick.button(12).whileTrue(
+        //algae
+        intakeAlgaeTrigger.whileTrue(
             new ParallelCommandGroup(
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE)));
-        secondaryStick.button(13).whileTrue(
+        outtakeAlgaeTrigger.whileTrue(
             new ParallelCommandGroup(
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true)));
 
-        zeroELevator.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
+        //util
+        zeroElevatorTrigger.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
 
-        secondaryStick.button(15).whileTrue(
-            new ParallelCommandGroup(
-                new InstantCommand(() -> led.light(Color.kRed)),
-                deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.FORWARD)));
-        secondaryStick.button(14).whileTrue(
-            new ParallelCommandGroup(
-                new InstantCommand(() -> led.light(Color.kRed)),
-                deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD)));
+        //deep climb :(
+        // secondaryStick.button(15).whileTrue(
+        //     new ParallelCommandGroup(
+        //         new InstantCommand(() -> led.light(Color.kRed)),
+        //         deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.FORWARD)));
+        // secondaryStick.button(14).whileTrue(
+        //     new ParallelCommandGroup(
+        //         new InstantCommand(() -> led.light(Color.kRed)),
+        //         deepclimb.new ChangeState(Constants.Deepclimb.deepClimbStates.BACKWARD)));
     }
 
     public Command getAutonomousCommand() {
