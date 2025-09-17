@@ -475,7 +475,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
         public void execute(){
-            drive(-commandXboxController.getLeftY(), -commandXboxController.getLeftX(), -commandXboxController.getRightX());
+            drive(-Math.signum(commandXboxController.getLeftY()) * Math.pow(commandXboxController.getLeftY(), 2),
+             -Math.signum(commandXboxController.getLeftX()) * Math.pow(commandXboxController.getLeftX(), 2), 
+             -commandXboxController.getRightX());
         }
     }
 

@@ -18,7 +18,7 @@ public class LED extends SubsystemBase {
     private AddressableLEDBuffer buffer;
 
     public LED() { 
-        strip = new AddressableLED(3);
+        strip = new AddressableLED(9);
         buffer = new AddressableLEDBuffer(170);
         strip.setLength(buffer.getLength());
         light(Color.kBlack);
@@ -52,6 +52,7 @@ public class LED extends SubsystemBase {
     public void periodic(){
         pattern.applyTo(buffer);
         strip.setData(buffer);
+        strip.start();
     }
 
     public class LightLED extends Command{

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LED;
 
@@ -20,8 +21,8 @@ public class AutoAlign extends AutoSwerve{
      * @param led LED subsystem(Status Lights: Red Blink = too far to align, Yellow Blink = aligning, Green Blink = aligned)
      * @param left If true the robot will align to the robot relative left closest reef pole, otherwise it will align to the robot relative closest right pole
      */
-    public AutoAlign(CommandSwerveDrivetrain swerve, LED led, boolean left){
-        super(swerve);
+    public AutoAlign(CommandSwerveDrivetrain swerve, Elevator elevator, LED led, boolean left){
+        super(swerve, elevator);
         this.left = left;
         this.led = led;
     }

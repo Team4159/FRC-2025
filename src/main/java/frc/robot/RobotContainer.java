@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -67,19 +68,19 @@ public class RobotContainer {
     private final Trigger brakeTrigger = driveController.b();
 
     //coral
-    private final Trigger outtakeTrigger = secondaryController.rightBumper();//secondaryStick.button(1);
-    private final Trigger intakeTrigger = secondaryController.rightTrigger(0.1);//secondaryStick.button(2);
+    private final Trigger outtakeTrigger = secondaryController.rightTrigger(0.1);//rightTrigger(0.1);//secondaryStick.button(1);
+    private final Trigger intakeTrigger = secondaryController.rightBumper();//secondaryStick.button(2);
     private final Trigger outtakeTroughTrigger = secondaryController.povUp();//secondaryStick.button(10);
-    private final Trigger AlgaeRemovalTrigger = secondaryController.x();//secondaryStick.button(9);
+    private final Trigger AlgaeRemovalTrigger = secondaryController.a();//secondaryStick.button(9);
     private final Trigger l1Trigger = secondaryController.povLeft();//secondaryStick.button(8);
-    private final Trigger l2Trigger = secondaryController.b();//secondaryStick.button(5);
-    private final Trigger l3Trigger = secondaryController.a();//secondaryStick.button(6);
-    private final Trigger l4Trigger = secondaryController.y();//secondaryStick.button(7);
+    private final Trigger l2Trigger = secondaryController.x();//secondaryStick.button(5);
+    private final Trigger l3Trigger = secondaryController.y();//secondaryStick.button(6);
+    private final Trigger l4Trigger = secondaryController.b();//secondaryStick.button(7);
     //private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
 
     //algae
-    private final Trigger intakeAlgaeTrigger = secondaryController.leftTrigger(0.1);
-    private final Trigger outtakeAlgaeTrigger = secondaryController.leftBumper();
+    private final Trigger intakeAlgaeTrigger = secondaryController.leftBumper();
+    private final Trigger outtakeAlgaeTrigger = secondaryController.leftTrigger(0.1);
 
     //util
     private final Trigger zeroElevatorTrigger = secondaryController.povDown();//secondaryStick.button(16);
@@ -123,15 +124,15 @@ public class RobotContainer {
 
         //button bindings
         //driver auto
-        autoAlignLeftTrigger.whileTrue(new AutoAlign(drivetrain, led, true));
-        autoAlignRightTrigger.whileTrue(new AutoAlign(drivetrain, led, false));
+        autoAlignLeftTrigger.whileTrue(new AutoAlign(drivetrain, elevator, led, true));
+        autoAlignRightTrigger.whileTrue(new AutoAlign(drivetrain, elevator, led, false));
         autoAlgaeRemovalTrigger.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
 
         //driver manual robot relative
-        manualAlignLeft.whileTrue(drivetrain.new ManualAlign(-0.15, 0));
-        manualAlignDown.whileTrue(drivetrain.new ManualAlign(0, -0.15));
-        manualAlignRight.whileTrue(drivetrain.new ManualAlign(0.15, 0));
-        manualAlignUp.whileTrue(drivetrain.new ManualAlign(0, 0.15));
+        manualAlignLeft.whileTrue(drivetrain.new ManualAlign(0, 0.15));
+        manualAlignDown.whileTrue(drivetrain.new ManualAlign(-0.15, 0));
+        manualAlignRight.whileTrue(drivetrain.new ManualAlign(0, -0.15));
+        manualAlignUp.whileTrue(drivetrain.new ManualAlign(0.15, 0));
 
         //driver util
         forceVisionTrigger.whileTrue(new InstantCommand(() -> vision.forceVision()));

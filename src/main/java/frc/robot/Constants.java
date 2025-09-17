@@ -25,7 +25,7 @@ public class Constants {
         /** Units: meters */
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
-        public static final double maxReefAutoAlignDistatnce = Units.inchesToMeters(120);
+        public static final double maxReefAutoAlignDistatnce = Units.inchesToMeters(100);
 
         //autoaim (autocoral and autoalgaeremoval)
         public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.75, 0.5);
@@ -50,8 +50,12 @@ public class Constants {
                     new TrapezoidProfile.Constraints(2, 2)));
 
         /**TODO tune accel limiting after ballast added */
-        public static final double maxAccelFullExtension = 2;
-        public static final double maxAccelFullRetraction = 6;
+        public static final double maxAccelFullExtension = 1.5;
+        public static final double maxAccelFullRetraction = 5;
+
+        //autoalign
+        public static final double maxAccelFullExtensionAutoAlign = 0.25;
+        public static final double maxAccelFullRetractionAutoAlign = 0.75;
     }
 
     public static final class Deepclimb {
@@ -105,7 +109,7 @@ public class Constants {
             INTAKE(Units.inchesToMeters(0)),
             L1(Units.inchesToMeters(2)),
             L2(Units.inchesToMeters(2)),
-            L3(Units.inchesToMeters(7.3)),
+            L3(Units.inchesToMeters(9)),
             L4(Units.inchesToMeters(21.5));
 
             public double height;
@@ -157,7 +161,7 @@ public class Constants {
             TROUGH(Units.degreesToRadians(200)),
             L1(Units.degreesToRadians(150)),
             L2(Units.degreesToRadians(200)),
-            L3(Units.degreesToRadians(182)),
+            L3(Units.degreesToRadians(200)),
             L4(Units.degreesToRadians(196));
 
             public double angle;

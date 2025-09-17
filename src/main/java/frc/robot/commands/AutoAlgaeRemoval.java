@@ -23,7 +23,7 @@ public class AutoAlgaeRemoval extends AutoSwerve{
     private boolean beginningState, tooFar;
 
     public AutoAlgaeRemoval(CommandSwerveDrivetrain drivetrain, Elevator elevator, CoralManipulator coralManipulator, LED led){
-        super(drivetrain);
+        super(drivetrain, elevator);
         this.elevator = elevator;
         this.coralManipulator = coralManipulator;
         this.led = led;
