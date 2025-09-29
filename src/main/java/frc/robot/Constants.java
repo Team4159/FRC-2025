@@ -199,6 +199,7 @@ public class Constants {
             // INTAKE(0.5, 1),
             // OUTTAKE(0.7, -1);
             STOW(1, 0),
+            MID(0.9, 0 ),
             INTAKE(0.7, 1),
             OUTTAKE(0.8, -1);
             public final double speed;
