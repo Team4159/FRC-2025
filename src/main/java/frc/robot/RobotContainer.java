@@ -194,14 +194,18 @@ public class RobotContainer {
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.ALGAEDEPLOY),
                 algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE)))
-            .onFalse(coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW));
+        .onFalse(
+            coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW));
 
         outtakeAlgaeTrigger.whileTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.ALGAEDEPLOY),
-                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE, true)))
-            .onFalse(coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW));
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE)))
+        .onFalse( 
+            new SequentialCommandGroup(
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.STOW),
+                coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW)));
 
         //util
         zeroElevatorTrigger.onTrue(new InstantCommand(() -> elevator.toggleZeroElevator())).onFalse(new InstantCommand(() -> elevator.toggleZeroElevator()));
