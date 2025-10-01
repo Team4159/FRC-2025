@@ -162,7 +162,8 @@ public class Constants {
             L1(Units.degreesToRadians(150)),
             L2(Units.degreesToRadians(200)),
             L3(Units.degreesToRadians(200)),
-            L4(Units.degreesToRadians(196));
+            L4(Units.degreesToRadians(196)),
+            ALGAEDEPLOY(Units.degreesToRadians(50));
 
             public double angle;
             private CoralManipulatorPivotState(double angle){
@@ -199,9 +200,9 @@ public class Constants {
             // INTAKE(0.5, 1),
             // OUTTAKE(0.7, -1);
             STOW(1, 0),
-            MID(0.9, 0 ),
             INTAKE(0.7, 1),
             OUTTAKE(0.8, -1);
+            
             public final double speed;
             public final double angle;
             private AlgaeIntakeState(double a, double s) {
