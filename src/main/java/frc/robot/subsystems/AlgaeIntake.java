@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -10,14 +11,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class AlgaeIntake extends SubsystemBase {
-    private SparkFlex roller;
-    private SparkFlex pivot;
+    private SparkFlex roller; //vortex
+    private SparkMax pivot; //neo
     private double targetAngle;
     private DutyCycleEncoder encoder;
 
     public AlgaeIntake() {
         roller = new SparkFlex(Constants.AlgaeIntake.rollerID, MotorType.kBrushless);
-        pivot = new SparkFlex(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
+        pivot = new SparkMax(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
         targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle;
         encoder = new DutyCycleEncoder(0);
     }
