@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.AlgaeIntake.AlgaeIntakeState;
 
 public class AlgaeIntake extends SubsystemBase {
     private SparkFlex roller; //vortex
@@ -34,6 +35,14 @@ public class AlgaeIntake extends SubsystemBase {
     public void setIntakeAngle(double angle) {
         targetAngle = angle;
         Constants.AlgaeIntake.pidController.reset();
+    }
+
+    public boolean isAtSetpoint(){
+        return Math.abs(encoder.get() - targetAngle) < Constants.AlgaeIntake.tolerance;
+    }
+
+    public boolean isStowed(){
+        return targetAngle == AlgaeIntakeState.STOW.angle && isAtSetpoint();
     }
 
     @Override
@@ -66,6 +75,11 @@ public class AlgaeIntake extends SubsystemBase {
         public void initialize() {
             setRollerSpeed(desiredState.speed);
             setIntakeAngle(desiredState.angle);
+        }
+
+        @Override
+        public boolean isFinished(){
+            return isAtSetpoint();
         }
 
         @Override

@@ -191,6 +191,8 @@ public class Constants {
         public static final double kI = 0;
         public static final double kD = 0;
 
+        public static final double tolerance = 0.01;
+
         public static final PIDController pidController = new PIDController(kP, kI, kD){{
             enableContinuousInput(0, 2*Math.PI);
         }};
@@ -201,7 +203,11 @@ public class Constants {
             // OUTTAKE(0.7, -1);
             STOW(1, 0),
             INTAKE(0.7, 1),
-            OUTTAKE(0.8, -1);
+            OUTTAKE(0.8, -1),
+            //TODO tune these setpoints
+            INTAKECORAL(0.1, 1),
+            OUTTAKECORAL(0.9, -1),
+            L4DOWN(0.9, 0);
             
             public final double speed;
             public final double angle;

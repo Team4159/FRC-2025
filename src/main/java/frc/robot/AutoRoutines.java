@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.Constants.Elevator.ElevatorState;
@@ -31,6 +32,7 @@ public class AutoRoutines extends SubsystemBase{
     private final Elevator elevator;
     private final CoralManipulator coralManipulator;
     private final CommandSwerveDrivetrain swerve;
+    private final AlgaeIntake algaeIntake;
     private final LED led;
     private SendableChooser<String> startChooser, reef1Chooser, station1Chooser, reef2Chooser, station2Chooser, reef3Chooser;
     private SendableChooser<Integer> typeChooser;
@@ -48,11 +50,12 @@ public class AutoRoutines extends SubsystemBase{
 
     private edu.wpi.first.math.trajectory.Trajectory trajectory = new edu.wpi.first.math.trajectory.Trajectory();
 
-    public AutoRoutines(AutoFactory factory, CommandSwerveDrivetrain swerve, Elevator elevator, CoralManipulator coralManipulator, LED led) {
+    public AutoRoutines(AutoFactory factory, CommandSwerveDrivetrain swerve, Elevator elevator, CoralManipulator coralManipulator, AlgaeIntake algaeIntake, LED led) {
         m_factory = factory;
         this.elevator = elevator;
         this.coralManipulator = coralManipulator;
         this.swerve = swerve;
+        this.algaeIntake = algaeIntake;
         this.led = led;
         field2d = new Field2d();
         instantiatePointChoosers();
@@ -109,7 +112,7 @@ public class AutoRoutines extends SubsystemBase{
                         //lower elevator
                         new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE))))
                 //intake
-                .andThen(new AutoIntake(coralManipulator, elevator, led))
+                .andThen(new AutoIntake(coralManipulator, elevator, algaeIntake, led))
                 //go to second l4
                 .andThen(
                     new ParallelCommandGroup(
@@ -148,7 +151,7 @@ public class AutoRoutines extends SubsystemBase{
                         //lower elevator
                         new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE))))
                 //intake
-                .andThen(new AutoIntake(coralManipulator, elevator, led))
+                .andThen(new AutoIntake(coralManipulator, elevator, algaeIntake, led))
                 //go to second l4
                 .andThen(
                     new ParallelCommandGroup(
@@ -165,7 +168,7 @@ public class AutoRoutines extends SubsystemBase{
                         //lower elevator
                         new SequentialCommandGroup(new WaitCommand(0.25), elevator.new ChangeState(ElevatorState.INTAKE))))
                 //intake
-                .andThen(new AutoIntake(coralManipulator, elevator, led))
+                .andThen(new AutoIntake(coralManipulator, elevator, algaeIntake, led))
                 //go to third l4
                 .andThen(
                     new ParallelCommandGroup(

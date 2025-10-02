@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Deepclimb;
+import frc.robot.Constants.AlgaeIntake.AlgaeIntakeState;
 //import frc.robot.subsystems.ElevatorArmSimulation;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
@@ -30,7 +32,7 @@ import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.commands.AutoAlgaeRemoval;
 import frc.robot.commands.AutoAlign;
-
+import frc.robot.commands.AutoIntake;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralManipulator;
@@ -106,7 +108,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         autoFactory = drivetrain.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulator, led);
+        autoRoutines = new AutoRoutines(autoFactory, drivetrain, elevator, coralManipulator, algaeIntake, led);
 
         drivetrain.setElevator(elevator);
 
@@ -146,11 +148,12 @@ public class RobotContainer {
         //coral
         outtakeTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         outtakeTroughTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
-        intakeTrigger.whileTrue(new ParallelCommandGroup(
-            new InstantCommand(() -> led.rainbow()),
-            elevator.new ChangeState(ElevatorState.INTAKE),
-            coralManipulator.new ChangeState(CoralManipulatorPivotState.INTAKE, CoralManipulatorRollerState.INTAKE)))
-            .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
+
+        intakeTrigger.whileTrue(
+        new AutoIntake(coralManipulator, elevator, algaeIntake, led))
+        .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
+
+
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
         l1Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
@@ -166,6 +169,7 @@ public class RobotContainer {
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3)));
         l4Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
+            algaeIntake.new ChangeState(AlgaeIntakeState.L4DOWN),
             elevator.new ChangeState(ElevatorState.L4),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4)));
         // AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
