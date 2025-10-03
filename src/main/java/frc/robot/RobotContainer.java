@@ -75,7 +75,7 @@ public class RobotContainer {
     private final Trigger intakeTrigger = secondaryController.rightBumper();//secondaryStick.button(2);
     private final Trigger outtakeTroughTrigger = secondaryController.povUp();//secondaryStick.button(10);
     private final Trigger AlgaeRemovalTrigger = secondaryController.a();//secondaryStick.button(9);
-    private final Trigger l1Trigger = secondaryController.povLeft();//secondaryStick.button(8);
+    //private final Trigger l1Trigger = secondaryController.povLeft();//secondaryStick.button(8);
     private final Trigger l2Trigger = secondaryController.x();//secondaryStick.button(5);
     private final Trigger l3Trigger = secondaryController.y();//secondaryStick.button(6);
     private final Trigger l4Trigger = secondaryController.b();//secondaryStick.button(7);
@@ -84,6 +84,10 @@ public class RobotContainer {
     //algae
     private final Trigger intakeAlgaeTrigger = secondaryController.leftBumper();
     private final Trigger outtakeAlgaeTrigger = secondaryController.leftTrigger(0.1);
+
+    //l1
+    private final Trigger intakeL1Trigger = secondaryController.povLeft();
+    private final Trigger outtakeL1Trigger = secondaryController.povRight();
 
     //util
     private final Trigger zeroElevatorTrigger = secondaryController.povDown();//secondaryStick.button(16);
@@ -149,16 +153,16 @@ public class RobotContainer {
         outtakeTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
         outtakeTroughTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.OUTTAKETROUGH)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
 
-        intakeTrigger.whileTrue(
+        intakeTrigger.onTrue(
         new AutoIntake(coralManipulator, elevator, algaeIntake, led))
         .onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
 
 
         beamBreakLEDTrigger.onTrue(led.new BlinkLED(Color.kGreen, 0.25, 1, true));
-        l1Trigger.onTrue(new ParallelCommandGroup(
-            new InstantCommand(() -> led.light(Color.kGreen)),
-            elevator.new ChangeState(ElevatorState.L1),
-            coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L1)));
+        // l1Trigger.onTrue(new ParallelCommandGroup(
+        //     new InstantCommand(() -> led.light(Color.kGreen)),
+        //     elevator.new ChangeState(ElevatorState.L1),
+        //    coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L1)));
         l2Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kGreen)),
             elevator.new ChangeState(ElevatorState.L2),
@@ -169,7 +173,7 @@ public class RobotContainer {
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L3)));
         l4Trigger.onTrue(new ParallelCommandGroup(
             new InstantCommand(() -> led.light(Color.kPurple)),
-            algaeIntake.new ChangeState(AlgaeIntakeState.L4DOWN),
+            algaeIntake.new ChangeState(AlgaeIntakeState.MIDDLE),
             elevator.new ChangeState(ElevatorState.L4),
             coralManipulator.new ChangePivotState(CoralManipulatorPivotState.L4)));
         // AlgaeRemovalSetup.onTrue(new ParallelCommandGroup(
@@ -197,15 +201,37 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.ALGAEDEPLOY),
-                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.INTAKE)))
-        .onFalse(
-            coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW));
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.ALGAEIN),
+                coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW)))
+            .onFalse(algaeIntake.new ChangeState(AlgaeIntakeState.ALGAEHOLD));
 
         outtakeAlgaeTrigger.whileTrue(
             new SequentialCommandGroup(
                 new InstantCommand(() -> led.light(Color.kTeal)),
                 coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.ALGAEDEPLOY),
                 algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.OUTTAKE)))
+        .onFalse( 
+            new SequentialCommandGroup(
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.STOW),
+                coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW)));
+
+        intakeL1Trigger.whileTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> led.light(Color.kTeal)),
+                coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.ALGAEDEPLOY),
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.CORALIN)))
+        .onFalse( 
+            new SequentialCommandGroup(
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.STOW),
+                coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.STOW)));
+
+                
+        outtakeL1Trigger.onTrue(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> led.light(Color.kTeal)),
+                coralManipulator.new ChangePivotState(Constants.CoralManipulator.CoralManipulatorPivotState.ALGAEDEPLOY),
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.CORALOUTNOSPIN),
+                algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.CORALOUT)))
         .onFalse( 
             new SequentialCommandGroup(
                 algaeIntake.new ChangeState(Constants.AlgaeIntake.AlgaeIntakeState.STOW),

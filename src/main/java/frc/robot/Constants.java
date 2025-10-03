@@ -186,12 +186,13 @@ public class Constants {
 
     public static final class AlgaeIntake {
         public static final int rollerID = 3, pivotID = 2;
-
+        
+        // TODO: TUNE PID
         public static final double kP = 1;
         public static final double kI = 0;
         public static final double kD = 0;
 
-        public static final double tolerance = 0.01;
+        public static final double tolerance = 0.05;
 
         public static final PIDController pidController = new PIDController(kP, kI, kD){{
             enableContinuousInput(0, 2*Math.PI);
@@ -201,13 +202,14 @@ public class Constants {
             // STOW(1.85, 0),
             // INTAKE(0.5, 1),
             // OUTTAKE(0.7, -1);
-            STOW(1, 0),
-            INTAKE(0.7, 1),
-            OUTTAKE(0.8, -1),
-            //TODO tune these setpoints
-            INTAKECORAL(0.1, 1),
-            OUTTAKECORAL(0.9, -1),
-            L4DOWN(0.9, 0);
+            STOW(0.91, 0),
+            ALGAEIN(0.58, 1),
+            ALGAEHOLD(0.58, 0),
+            CORALIN(0.25, -0.5),
+            CORALOUT(0.77, 0.5),
+            CORALOUTNOSPIN(0.77, 0),
+            OUTTAKE(0.7, -1),
+            MIDDLE(0.83, 0);
             
             public final double speed;
             public final double angle;

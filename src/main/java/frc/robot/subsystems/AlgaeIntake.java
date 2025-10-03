@@ -15,13 +15,11 @@ public class AlgaeIntake extends SubsystemBase {
     private SparkFlex roller; //vortex
     private SparkMax pivot; //neo
     private double targetAngle;
-    private DutyCycleEncoder encoder;
 
     public AlgaeIntake() {
         roller = new SparkFlex(Constants.AlgaeIntake.rollerID, MotorType.kBrushless);
         pivot = new SparkMax(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
         targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle;
-        encoder = new DutyCycleEncoder(0);
     }
 
     public void setRollerSpeed(double speed) {
@@ -38,7 +36,7 @@ public class AlgaeIntake extends SubsystemBase {
     }
 
     public boolean isAtSetpoint(){
-        return Math.abs(encoder.get() - targetAngle) < Constants.AlgaeIntake.tolerance;
+        return Math.abs(pivot.getAbsoluteEncoder().getPosition() - targetAngle) < Constants.AlgaeIntake.tolerance;
     }
 
     public boolean isStowed(){
@@ -48,10 +46,7 @@ public class AlgaeIntake extends SubsystemBase {
     @Override
     public void periodic(){
         //double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
-        double currentAngle = encoder.get();
-        if(currentAngle < 0.25){
-            currentAngle = 1;
-        }
+        double currentAngle = pivot.getAbsoluteEncoder().getPosition();
         SmartDashboard.putNumber("AlgaeManip angle", currentAngle);
         pivot.set(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
     }
@@ -84,7 +79,6 @@ public class AlgaeIntake extends SubsystemBase {
 
         @Override
         public void end(boolean interrupted) {
-            stopRoller();
             if (stow) setIntakeAngle(Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle);
         }
     }

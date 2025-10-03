@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 import frc.robot.subsystems.CoralManipulator;
 
@@ -16,6 +17,7 @@ public class AutoIntakeRoller extends Command{
 
     @Override
     public void initialize(){
+        coralManipulator.setPivotGoalState(CoralManipulatorPivotState.INTAKE);
         coralManipulator.setRollerGoalState(CoralManipulatorRollerState.INTAKE);
     }
 
