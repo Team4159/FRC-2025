@@ -50,7 +50,7 @@ public class Constants {
                     new TrapezoidProfile.Constraints(2, 2)));
 
         /**TODO tune accel limiting after ballast added */
-        public static final double maxAccelFullExtension = 1.5;
+        public static final double maxAccelFullExtension = 1.25;
         public static final double maxAccelFullRetraction = 5;
 
         //autoalign
@@ -198,9 +198,9 @@ public class Constants {
             // STOW(1.85, 0),
             // INTAKE(0.5, 1),
             // OUTTAKE(0.7, -1);
-            STOW(1, 0),
-            INTAKE(0.7, 1),
-            OUTTAKE(0.8, -1);
+            STOW(0.8, 0),
+            INTAKE(0.4, 1),
+            OUTTAKE(0.6, -1);
             public final double speed;
             public final double angle;
             private AlgaeIntakeState(double a, double s) {

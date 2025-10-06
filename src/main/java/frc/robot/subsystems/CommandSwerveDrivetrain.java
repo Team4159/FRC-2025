@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -93,6 +94,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private AdjustableSlewRateLimiter limiterY = new AdjustableSlewRateLimiter(1, -1, 0);
 
     private Elevator elevator;
+
+    private CANcoder encoder2 = new CANcoder(2, "Drivetrain");
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     // private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -416,6 +419,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         closestPoseF2d.setRobotPose(getState().Pose);
         SmartDashboard.putData("closest reef", closestPoseF2d);
         setMaxAccel();
+
+        SmartDashboard.putNumber("encoder 2 reading", encoder2.getAbsolutePosition().getValueAsDouble());
     }
 
     /**

@@ -171,8 +171,11 @@ public class RobotContainer {
         //     coralManipulator.new ChangeState(CoralManipulatorPivotState.L3, CoralManipulatorRollerState.OUTTAKE),
         //     elevator.new ChangeState(ElevatorState.L3)));
         AlgaeRemovalTrigger.onTrue(new ParallelCommandGroup(
-            coralManipulator.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, CoralManipulatorRollerState.OUTTAKE),
-            elevator.new ChangeState(ElevatorState.L3)));
+            coralManipulator.new ChangeState(CoralManipulatorPivotState.L2, CoralManipulatorRollerState.OUTTAKE),
+            elevator.new ChangeState(ElevatorState.L2)))
+            .onFalse(new ParallelCommandGroup(
+                coralManipulator.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, CoralManipulatorRollerState.OUTTAKE),
+                elevator.new ChangeState(ElevatorState.L3)));
 
         //algae
         intakeAlgaeTrigger.whileTrue(

@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -11,15 +12,15 @@ import frc.robot.Constants;
 
 public class AlgaeIntake extends SubsystemBase {
     private SparkMax roller;
-    private SparkMax pivot;
+    private SparkFlex pivot;
     private double targetAngle;
-    private DutyCycleEncoder encoder;
+    //private DutyCycleEncoder encoder;
 
     public AlgaeIntake() {
         roller = new SparkMax(Constants.AlgaeIntake.rollerID, MotorType.kBrushless);
-        pivot = new SparkMax(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
+        pivot = new SparkFlex(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
         targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle;
-        encoder = new DutyCycleEncoder(0);
+        //encoder = new DutyCycleEncoder(0);
     }
 
     public void setRollerSpeed(double speed) {
@@ -35,15 +36,19 @@ public class AlgaeIntake extends SubsystemBase {
         Constants.AlgaeIntake.pidController.reset();
     }
 
+    public double getAngle(){
+        return pivot.getAbsoluteEncoder().getPosition();
+    }
+
     @Override
     public void periodic(){
         //double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
-        double currentAngle = encoder.get();
-        if(currentAngle < 0.25){
-            currentAngle = 1;
-        }
-        SmartDashboard.putNumber("AlgaeManip angle", currentAngle);
-        pivot.set(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
+        // double currentAngle = encoder.get();
+        // if(currentAngle < 0.25){
+        //     currentAngle = 1;
+        // }
+        SmartDashboard.putNumber("AlgaeManip angle", getAngle());
+        pivot.set(-Constants.AlgaeIntake.pidController.calculate(getAngle(), targetAngle));
     }
 
     public class ChangeState extends Command {
