@@ -95,7 +95,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Elevator elevator;
 
+    private CANcoder encoder1 = new CANcoder(1, "Drivetrain");
     private CANcoder encoder2 = new CANcoder(2, "Drivetrain");
+    private CANcoder encoder3 = new CANcoder(3, "Drivetrain");
+    private CANcoder encoder4 = new CANcoder(4, "Drivetrain");
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     // private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -420,7 +423,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SmartDashboard.putData("closest reef", closestPoseF2d);
         setMaxAccel();
 
+        SmartDashboard.putNumber("encoder 1 reading", encoder1.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("encoder 2 reading", encoder2.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("encoder 3 reading", encoder3.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("encoder 4 reading", encoder4.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
