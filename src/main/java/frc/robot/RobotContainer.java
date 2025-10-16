@@ -76,6 +76,8 @@ public class RobotContainer {
     private final Trigger l2Trigger = secondaryController.x();//secondaryStick.button(5);
     private final Trigger l3Trigger = secondaryController.y();//secondaryStick.button(6);
     private final Trigger l4Trigger = secondaryController.b();//secondaryStick.button(7);
+    //only intakes with the rollers and does not move the pivot or elevator
+    private final Trigger intakeOnlyTrigger = secondaryController.povUp();
     //private final Trigger AlgaeRemovalSetup = secondaryStick.button(8);
 
     //algae
@@ -176,6 +178,7 @@ public class RobotContainer {
             .onFalse(new ParallelCommandGroup(
                 coralManipulator.new ChangeState(CoralManipulatorPivotState.ALGAEREMOVAL, CoralManipulatorRollerState.OUTTAKE),
                 elevator.new ChangeState(ElevatorState.L3)));
+        intakeOnlyTrigger.onTrue(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.INTAKE)).onFalse(coralManipulator.new ChangeRollerState(CoralManipulatorRollerState.PASSIVE));
 
         //algae
         intakeAlgaeTrigger.whileTrue(
