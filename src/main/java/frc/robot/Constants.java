@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -208,6 +209,11 @@ public class Constants {
                 angle = a;
             }
         }
+    }
+
+    public static final class Vision{
+        public static final Transform3d leftCameraToRobotTransform = new Transform3d();
+        public static final Transform3d rightCameraToRobotTransform = new Transform3d();
     }
 
     public static final class Field{

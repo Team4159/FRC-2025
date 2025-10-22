@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LED;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Deepclimb;
 //import frc.robot.subsystems.ElevatorArmSimulation;
 import frc.robot.Constants.CoralManipulator.CoralManipulatorPivotState;
@@ -95,6 +96,7 @@ public class RobotContainer {
     private final Deepclimb deepclimb = new Deepclimb();
     private final LED led = new LED();
     public final Vision vision = new Vision(drivetrain);
+    private final PhotonVision photonVision = new PhotonVision(drivetrain);
 
     //simulation
     //private final ElevatorArmSimulation elevatorArmSimulation = new ElevatorArmSimulation(elevator, coralManipulatorPivot);

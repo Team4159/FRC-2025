@@ -16,13 +16,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
+//only for limelight
 public class Vision extends SubsystemBase{
-    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
-    Pose2d visionPose;
-    CommandSwerveDrivetrain drivetrain;
-    boolean doRejectUpdate, mt1rotation;
-    ShuffleboardTab visionTab;
-    Field2d visionField;
+    private NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    private Pose2d visionPose;
+    private CommandSwerveDrivetrain drivetrain;
+    private boolean doRejectUpdate, mt1rotation;
+    private ShuffleboardTab visionTab;
+    private Field2d visionField;
 
     public Vision(CommandSwerveDrivetrain drivetrain){
         this.drivetrain = drivetrain;
