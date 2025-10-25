@@ -10,11 +10,22 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import com.ctre.phoenix6.Utils;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -24,31 +35,37 @@ public class PhotonVision extends SubsystemBase{
     //TODO: make mounts for cameras and add their transform data
     private PhotonCamera leftCam, rightCam;
     private PhotonPoseEstimator leftEstimator, rightEstimator;
+    private Field2d leftCamField = new Field2d();
+    private double timeOffset;
 
     public PhotonVision(CommandSwerveDrivetrain drivetrain){
         this.drivetrain = drivetrain;
         leftCam = new PhotonCamera("leftCam");
         rightCam = new PhotonCamera("rightCam");
-        leftEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.leftCameraToRobotTransform);
-        rightEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.rightCameraToRobotTransform);
+        leftEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.leftRobotToCameraTransform);
+        rightEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.rightRobotToCameraTransform);
+        timeOffset = Utils.getCurrentTimeSeconds() - Timer.getFPGATimestamp();
+        SmartDashboard.putNumber("time offset", timeOffset);
+        leftCamField.setRobotPose(new Pose2d());
+        leftCamField.getObject("camera").setPose(new Pose2d(Constants.Vision.rightCameraX, Constants.Vision.rightCameraY, new Rotation2d(Constants.Vision.rightRotationY)));
     }
 
     @Override
     public void periodic(){
+        SmartDashboard.putBoolean("nt connected", NetworkTableInstance.getDefault().isConnected());
+        SmartDashboard.putData("leftcamfield", leftCamField);
         //left camera
         Optional<EstimatedRobotPose> leftEstimate = Optional.empty();
         //loops through all unread camera results
         for(PhotonPipelineResult leftCamResult : leftCam.getAllUnreadResults()){
-            System.out.println("leftcamresult exists");
             //get pose estimate
             leftEstimate = leftEstimator.update(leftCamResult);
             //check if estimate exists
             if(leftEstimate.isPresent()){
-                System.out.println("leftestimate present");
                 //set standard deviation
                 drivetrain.setVisionMeasurementStdDevs(calculateEstimationStdDevs(leftEstimate, leftCamResult.targets));
                 //send the pose estimate to the pose estimator
-                drivetrain.addVisionMeasurement(leftEstimate.get().estimatedPose.toPose2d(), leftEstimate.get().timestampSeconds);
+                drivetrain.addVisionMeasurement(leftEstimate.get().estimatedPose.toPose2d(), leftEstimate.get().timestampSeconds + timeOffset);
             }
         }
 
@@ -56,10 +73,14 @@ public class PhotonVision extends SubsystemBase{
         Optional<EstimatedRobotPose> rightEstimate = Optional.empty();
         //loops through all unread camera results
         for(PhotonPipelineResult rightCamResult : rightCam.getAllUnreadResults()){
+            //get pose estimate
             rightEstimate = rightEstimator.update(rightCamResult);
+            //check if estimate exists
             if(rightEstimate.isPresent()){
+                //set standard deviation
                 drivetrain.setVisionMeasurementStdDevs(calculateEstimationStdDevs(rightEstimate, rightCamResult.targets));
-                drivetrain.addVisionMeasurement(rightEstimate.get().estimatedPose.toPose2d(), rightEstimate.get().timestampSeconds);
+                //send the pose estimate to the pose estimator
+                drivetrain.addVisionMeasurement(rightEstimate.get().estimatedPose.toPose2d(), rightEstimate.get().timestampSeconds + timeOffset);
             }
         }
     }

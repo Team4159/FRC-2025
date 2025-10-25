@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -212,8 +213,29 @@ public class Constants {
     }
 
     public static final class Vision{
-        public static final Transform3d leftCameraToRobotTransform = new Transform3d();
-        public static final Transform3d rightCameraToRobotTransform = new Transform3d();
+        //Right Camera
+        public static final double rightCameraX = Units.inchesToMeters(-3.326195);
+        public static final double rightCameraY = Units.inchesToMeters(7.907508);
+        public static final double rightCameraZ = Units.inchesToMeters(31.258134 - 1.5);
+        public static final double rightRotationX = Units.degreesToRadians(0);
+        public static final double rightRotationY = Units.degreesToRadians(-50);
+        public static final double rightRotationZ = Units.degreesToRadians(-140);
+
+        //Left Camera
+        public static final double leftCameraX = Units.inchesToMeters(3.326195);
+        public static final double leftCameraY = Units.inchesToMeters(7.907508);
+        public static final double leftCameraZ = Units.inchesToMeters(31.258134);
+        //TODO: change based on right camera values
+        public static final double leftRotationX = Units.degreesToRadians(0);
+        public static final double leftRotationY = Units.degreesToRadians(-50);
+        public static final double leftRotationZ = Units.degreesToRadians(140);
+
+        public static final Transform3d leftRobotToCameraTransform = 
+            new Transform3d(leftCameraX, leftCameraY, leftCameraZ,
+                new Rotation3d(leftRotationX, leftRotationY, leftRotationZ));
+        public static final Transform3d rightRobotToCameraTransform = 
+        new Transform3d(rightCameraX, rightCameraY, rightCameraZ,
+            new Rotation3d(rightRotationX, rightRotationY, rightRotationZ));
     }
 
     public static final class Field{

@@ -24,6 +24,7 @@ public class Vision extends SubsystemBase{
     private boolean doRejectUpdate, mt1rotation;
     private ShuffleboardTab visionTab;
     private Field2d visionField;
+    private double timeOffset;
 
     public Vision(CommandSwerveDrivetrain drivetrain){
         this.drivetrain = drivetrain;
@@ -32,7 +33,9 @@ public class Vision extends SubsystemBase{
         mt1rotation = false;
         Shuffleboard.getTab("Vision").add("visionPose", visionField);
         Shuffleboard.getTab("Vision").add("Megatag Yaw", mt1rotation);
+        timeOffset = Utils.getCurrentTimeSeconds();
     }
+
 
     @Override
     public void periodic(){
@@ -88,6 +91,9 @@ public class Vision extends SubsystemBase{
             drivetrain.addVisionMeasurement(visionPose, Utils.getCurrentTimeSeconds() - Units.millisecondsToSeconds(
                 limelight.getEntry("cl").getDouble(0) +
                 limelight.getEntry("tl").getDouble(0)));
+            System.out.println("ll latency: " + (Utils.getCurrentTimeSeconds() - Units.millisecondsToSeconds(
+                limelight.getEntry("cl").getDouble(0) +
+                limelight.getEntry("tl").getDouble(0))));
         }
         visionField.setRobotPose(visionPose);
     }
