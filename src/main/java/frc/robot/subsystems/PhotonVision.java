@@ -16,26 +16,16 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.net.PortForwarder;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class PhotonVision extends SubsystemBase{
     private CommandSwerveDrivetrain drivetrain;
     private AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
-    //TODO: make mounts for cameras and add their transform data
     private PhotonCamera leftCam, rightCam;
     private PhotonPoseEstimator leftEstimator, rightEstimator;
-    private Field2d leftCamField = new Field2d();
     private double timeOffset;
 
     public PhotonVision(CommandSwerveDrivetrain drivetrain){
@@ -45,15 +35,11 @@ public class PhotonVision extends SubsystemBase{
         leftEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.leftRobotToCameraTransform);
         rightEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.rightRobotToCameraTransform);
         timeOffset = Utils.getCurrentTimeSeconds() - Timer.getFPGATimestamp();
-        SmartDashboard.putNumber("time offset", timeOffset);
-        leftCamField.setRobotPose(new Pose2d());
-        leftCamField.getObject("camera").setPose(new Pose2d(Constants.Vision.rightCameraX, Constants.Vision.rightCameraY, new Rotation2d(Constants.Vision.rightRotationY)));
+        // SmartDashboard.putNumber("time offset", timeOffset);
     }
 
     @Override
     public void periodic(){
-        SmartDashboard.putBoolean("nt connected", NetworkTableInstance.getDefault().isConnected());
-        SmartDashboard.putData("leftcamfield", leftCamField);
         //left camera
         Optional<EstimatedRobotPose> leftEstimate = Optional.empty();
         //loops through all unread camera results
@@ -142,7 +128,7 @@ public class PhotonVision extends SubsystemBase{
                 area += tag.area/100; 
             }
             System.out.println("stddev position: " + (1 - area * 0.3));
-            //TODO: tune, currently this is just the limelight one
+            //TODO: tune, currently this is just the limelight one(why are sds on limelight negative lol)
             return VecBuilder.fill(1 - area * 0.3, 1 - area * 0.3, 1-area * 0.1);
         }
         //if the estimated pose does not exist just return extremely high stddevs

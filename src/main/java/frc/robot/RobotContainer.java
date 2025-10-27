@@ -31,7 +31,7 @@ import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.commands.AutoAlgaeRemoval;
 import frc.robot.commands.AutoAlign;
-
+import frc.robot.commands.AutoAlignStation;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralManipulator;
@@ -57,6 +57,7 @@ public class RobotContainer {
     private final Trigger autoAlignLeftTrigger = driveController.leftBumper();//driveStick.button(11).or(ps4Controller.square());
     private final Trigger autoAlignRightTrigger = driveController.rightBumper();//driveStick.button(12).or(ps4Controller.circle());
     private final Trigger autoAlgaeRemovalTrigger = driveController.rightTrigger(0.1);//.button(14).or(ps4Controller.L1());
+    private final Trigger autoAlignStationTrigger = driveController.leftTrigger(0.1);
 
     //driver manual robot relative align
     private final Trigger manualAlignLeft = driveController.povLeft();
@@ -132,6 +133,7 @@ public class RobotContainer {
         autoAlignLeftTrigger.whileTrue(new AutoAlign(drivetrain, elevator, led, true));
         autoAlignRightTrigger.whileTrue(new AutoAlign(drivetrain, elevator, led, false));
         autoAlgaeRemovalTrigger.whileTrue(new AutoAlgaeRemoval(drivetrain, elevator, coralManipulator, led));
+        autoAlignStationTrigger.whileTrue(new AutoAlignStation(drivetrain, elevator, led));
 
         //driver manual robot relative
         manualAlignLeft.whileTrue(drivetrain.new ManualAlign(0, 0.15));

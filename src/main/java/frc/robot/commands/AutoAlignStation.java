@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants;
 import frc.robot.subsystems.Elevator;
@@ -17,6 +19,7 @@ public class AutoAlignStation extends AutoSwerve{
     private boolean left;
     private boolean tooFar;
     private LED led;
+    private Field2d f2d = new Field2d();
 
     /**
      * @param swerve CommandSwerveDrivetrain subsystem for the swerve drivetrain
@@ -30,10 +33,13 @@ public class AutoAlignStation extends AutoSwerve{
 
     @Override
     public void initialize(){
-        var reefPoses = Constants.Field.reef.get(DriverStation.getAlliance().orElse(Alliance.Blue));
+        var reefPoses = Constants.Field.stations.get(DriverStation.getAlliance().orElse(Alliance.Blue));
         desiredPose = swerve.getState().Pose.nearest(reefPoses);
+        f2d.setRobotPose(desiredPose);
+        SmartDashboard.putData("autostation f2d", f2d);
         if(desiredPose.minus(swerve.getState().Pose).getTranslation().getNorm() < Constants.Swerve.maxReefAutoAlignDistatnce){
             tooFar = false;
+            super.initialize();
         }
         else{
             tooFar = true;

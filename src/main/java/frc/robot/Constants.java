@@ -31,7 +31,7 @@ public class Constants {
 
         //autoaim (autocoral and autoalgaeremoval)
         public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.75, 0.5);
-        public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(3, 3);
+        public static final  TrapezoidProfile.Constraints rotationConstraints = new Constraints(3, 6);
         /** ProfiledPIDController used for autoaim translation*/
         //ki original 0.5
         public static final ProfiledPIDController translationController = new ProfiledPIDController(2, 0.25, 0, translationConstraints);
@@ -222,10 +222,9 @@ public class Constants {
         public static final double rightRotationZ = Units.degreesToRadians(-140);
 
         //Left Camera
-        public static final double leftCameraX = Units.inchesToMeters(3.326195);
-        public static final double leftCameraY = Units.inchesToMeters(7.907508);
-        public static final double leftCameraZ = Units.inchesToMeters(31.258134);
-        //TODO: change based on right camera values
+        public static final double leftCameraX = Units.inchesToMeters(-3.326195);
+        public static final double leftCameraY = Units.inchesToMeters(-7.907508);
+        public static final double leftCameraZ = Units.inchesToMeters(31.258134 - 1.5);
         public static final double leftRotationX = Units.degreesToRadians(0);
         public static final double leftRotationY = Units.degreesToRadians(-50);
         public static final double leftRotationZ = Units.degreesToRadians(140);
