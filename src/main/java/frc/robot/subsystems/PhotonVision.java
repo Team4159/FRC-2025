@@ -24,17 +24,20 @@ import frc.robot.Constants;
 public class PhotonVision extends SubsystemBase{
     private CommandSwerveDrivetrain drivetrain;
     private AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
-    private PhotonCamera leftCam, rightCam;
+    private PhotonCamera leftCam, rightCam, algaeCam;
     private PhotonPoseEstimator leftEstimator, rightEstimator;
     private double timeOffset;
 
     public PhotonVision(CommandSwerveDrivetrain drivetrain){
         this.drivetrain = drivetrain;
+        //apriltag
         leftCam = new PhotonCamera("leftCam");
         rightCam = new PhotonCamera("rightCam");
         leftEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.leftRobotToCameraTransform);
         rightEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.rightRobotToCameraTransform);
         timeOffset = Utils.getCurrentTimeSeconds() - Timer.getFPGATimestamp();
+        //object detection
+        algaeCam = new PhotonCamera("algaeDetection");
         // SmartDashboard.putNumber("time offset", timeOffset);
     }
 
@@ -69,6 +72,20 @@ public class PhotonVision extends SubsystemBase{
                 drivetrain.addVisionMeasurement(rightEstimate.get().estimatedPose.toPose2d(), rightEstimate.get().timestampSeconds + timeOffset);
             }
         }
+
+        for(PhotonPipelineResult algaeCamResult : algaeCam.getAllUnreadResults()){
+            var algae = algaeCamResult.getBestTarget();
+            if(algae == null) return;
+            var confidence = algae.getDetectedObjectConfidence();
+            var pose = algae.getYaw();
+        }
+    }
+
+    public Double getAlgaeYaw(){
+        PhotonPipelineResult result = algaeCam.getLatestResult();
+        var algae = result.getBestTarget();
+        if(algae == null || algae.getDetectedObjectConfidence() < 0.2) return null;
+        return algae.getYaw();
     }
 
     //default photonvision stddev calculator

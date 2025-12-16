@@ -335,6 +335,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         setControl(m_driveApplyRobotSpeeds.withSpeeds(desiredSpeeds));
     }
 
+    /** uses robot relative control */
+    public void RobotRelativeDrive(double inputX, double inputY, double inputOmega){
+        double speedX = limiterX.calculate(MathUtil.applyDeadband(inputX, 0.1)* TunerConstants.kSpeedAt12Volts.magnitude());
+        double speedY = limiterY.calculate(MathUtil.applyDeadband(inputY, 0.1) * TunerConstants.kSpeedAt12Volts.magnitude());
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(speedX, speedY, inputOmega);
+        setControl(m_driveApplyRobotSpeeds.withSpeeds(desiredSpeeds));
+    }
+
     /** uses field relative control */
     public void drive(double inputX, double inputY, double inputOmega){
         //open loop

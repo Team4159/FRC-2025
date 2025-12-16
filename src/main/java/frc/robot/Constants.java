@@ -28,6 +28,8 @@ public class Constants {
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
         public static final double maxReefAutoAlignDistatnce = Units.inchesToMeters(100);
+        /** Units: meters/second */
+        public static final double maxAutoIntakeAlgaeSpeed = 1;
 
         //autoaim (autocoral and autoalgaeremoval)
         public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.75, 0.5);
@@ -214,20 +216,20 @@ public class Constants {
 
     public static final class Vision{
         //Right Camera
-        public static final double rightCameraX = Units.inchesToMeters(-3.326195);
-        public static final double rightCameraY = Units.inchesToMeters(7.907508);
-        public static final double rightCameraZ = Units.inchesToMeters(31.258134 - 1.5);
+        public static final double rightCameraX = Units.inchesToMeters(10.254600);
+        public static final double rightCameraY = Units.inchesToMeters(-8.580528);
+        public static final double rightCameraZ = Units.inchesToMeters(7.879263);
         public static final double rightRotationX = Units.degreesToRadians(0);
-        public static final double rightRotationY = Units.degreesToRadians(-50);
-        public static final double rightRotationZ = Units.degreesToRadians(-140);
+        public static final double rightRotationY = Units.degreesToRadians(-20);
+        public static final double rightRotationZ = Units.degreesToRadians(30);
 
         //Left Camera
-        public static final double leftCameraX = Units.inchesToMeters(-3.326195);
-        public static final double leftCameraY = Units.inchesToMeters(-7.907508);
-        public static final double leftCameraZ = Units.inchesToMeters(31.258134 - 1.5);
+        public static final double leftCameraX = Units.inchesToMeters(10.254600);
+        public static final double leftCameraY = Units.inchesToMeters(8.580528);
+        public static final double leftCameraZ = Units.inchesToMeters(7.879263);
         public static final double leftRotationX = Units.degreesToRadians(0);
-        public static final double leftRotationY = Units.degreesToRadians(-50);
-        public static final double leftRotationZ = Units.degreesToRadians(140);
+        public static final double leftRotationY = Units.degreesToRadians(-20);
+        public static final double leftRotationZ = Units.degreesToRadians(-30);
 
         public static final Transform3d leftRobotToCameraTransform = 
             new Transform3d(leftCameraX, leftCameraY, leftCameraZ,
