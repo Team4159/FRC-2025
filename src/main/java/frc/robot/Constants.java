@@ -28,8 +28,8 @@ public class Constants {
         public static final double L4Offset = Units.inchesToMeters(3.5);
         /** Units: meters */
         public static final double maxReefAutoAlignDistatnce = Units.inchesToMeters(100);
-        /** Units: meters/second */
-        public static final double maxAutoIntakeAlgaeSpeed = 1;
+
+        public static final double maxAutoIntakeAlgaeSpeed = 0.15;
 
         //autoaim (autocoral and autoalgaeremoval)
         public static final  TrapezoidProfile.Constraints translationConstraints = new Constraints(0.75, 0.5);

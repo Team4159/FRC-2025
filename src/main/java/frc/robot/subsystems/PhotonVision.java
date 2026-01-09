@@ -31,8 +31,8 @@ public class PhotonVision extends SubsystemBase{
     public PhotonVision(CommandSwerveDrivetrain drivetrain){
         this.drivetrain = drivetrain;
         //apriltag
-        leftCam = new PhotonCamera("leftCam");
-        rightCam = new PhotonCamera("rightCam");
+        //leftCam = new PhotonCamera("leftCam");
+        //rightCam = new PhotonCamera("rightCam");
         leftEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.leftRobotToCameraTransform);
         rightEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.Vision.rightRobotToCameraTransform);
         timeOffset = Utils.getCurrentTimeSeconds() - Timer.getFPGATimestamp();
@@ -44,41 +44,41 @@ public class PhotonVision extends SubsystemBase{
     @Override
     public void periodic(){
         //left camera
-        Optional<EstimatedRobotPose> leftEstimate = Optional.empty();
-        //loops through all unread camera results
-        for(PhotonPipelineResult leftCamResult : leftCam.getAllUnreadResults()){
-            //get pose estimate
-            leftEstimate = leftEstimator.update(leftCamResult);
-            //check if estimate exists
-            if(leftEstimate.isPresent()){
-                //set standard deviation
-                drivetrain.setVisionMeasurementStdDevs(calculateEstimationStdDevs(leftEstimate, leftCamResult.targets));
-                //send the pose estimate to the pose estimator
-                drivetrain.addVisionMeasurement(leftEstimate.get().estimatedPose.toPose2d(), leftEstimate.get().timestampSeconds + timeOffset);
-            }
-        }
+    //     Optional<EstimatedRobotPose> leftEstimate = Optional.empty();
+    //     //loops through all unread camera results
+    //     for(PhotonPipelineResult leftCamResult : leftCam.getAllUnreadResults()){
+    //         //get pose estimate
+    //         leftEstimate = leftEstimator.update(leftCamResult);
+    //         //check if estimate exists
+    //         if(leftEstimate.isPresent()){
+    //             //set standard deviation
+    //             drivetrain.setVisionMeasurementStdDevs(calculateEstimationStdDevs(leftEstimate, leftCamResult.targets));
+    //             //send the pose estimate to the pose estimator
+    //             drivetrain.addVisionMeasurement(leftEstimate.get().estimatedPose.toPose2d(), leftEstimate.get().timestampSeconds + timeOffset);
+    //         }
+    //     }
 
-        //right camera
-        Optional<EstimatedRobotPose> rightEstimate = Optional.empty();
-        //loops through all unread camera results
-        for(PhotonPipelineResult rightCamResult : rightCam.getAllUnreadResults()){
-            //get pose estimate
-            rightEstimate = rightEstimator.update(rightCamResult);
-            //check if estimate exists
-            if(rightEstimate.isPresent()){
-                //set standard deviation
-                drivetrain.setVisionMeasurementStdDevs(calculateEstimationStdDevs(rightEstimate, rightCamResult.targets));
-                //send the pose estimate to the pose estimator
-                drivetrain.addVisionMeasurement(rightEstimate.get().estimatedPose.toPose2d(), rightEstimate.get().timestampSeconds + timeOffset);
-            }
-        }
+    //     //right camera
+    //     Optional<EstimatedRobotPose> rightEstimate = Optional.empty();
+    //     //loops through all unread camera results
+    //     for(PhotonPipelineResult rightCamResult : rightCam.getAllUnreadResults()){
+    //         //get pose estimate
+    //         rightEstimate = rightEstimator.update(rightCamResult);
+    //         //check if estimate exists
+    //         if(rightEstimate.isPresent()){
+    //             //set standard deviation
+    //             drivetrain.setVisionMeasurementStdDevs(calculateEstimationStdDevs(rightEstimate, rightCamResult.targets));
+    //             //send the pose estimate to the pose estimator
+    //             drivetrain.addVisionMeasurement(rightEstimate.get().estimatedPose.toPose2d(), rightEstimate.get().timestampSeconds + timeOffset);
+    //         }
+    //     }
 
-        for(PhotonPipelineResult algaeCamResult : algaeCam.getAllUnreadResults()){
-            var algae = algaeCamResult.getBestTarget();
-            if(algae == null) return;
-            var confidence = algae.getDetectedObjectConfidence();
-            var pose = algae.getYaw();
-        }
+    //     for(PhotonPipelineResult algaeCamResult : algaeCam.getAllUnreadResults()){
+    //         var algae = algaeCamResult.getBestTarget();
+    //         if(algae == null) return;
+    //         var confidence = algae.getDetectedObjectConfidence();
+    //         var pose = algae.getYaw();
+    //     }
     }
 
     public Double getAlgaeYaw(){

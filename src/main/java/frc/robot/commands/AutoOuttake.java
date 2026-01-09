@@ -15,6 +15,7 @@ public class AutoOuttake extends Command{
     private double backupTimeOffset;
     private double timeOffset;
     private Timer timer;
+    private Timer bTimer;//backup timer
 
     /** @param backupTimer will end the command automatically after a certain amout of time. used for auto*/
     public AutoOuttake(CoralManipulator coralManipulator, Elevator elevator, boolean backupTimer, boolean trough){
@@ -23,6 +24,7 @@ public class AutoOuttake extends Command{
         this.backupTimer = backupTimer;
         this.trough = trough;
         timer = new Timer();
+        bTimer = new Timer();
         usingTimer = false;
         addRequirements(coralManipulator, elevator);
     }
@@ -47,6 +49,8 @@ public class AutoOuttake extends Command{
         usingTimer = false;
         timer.stop();
         timer.reset();
+        bTimer.reset();
+        bTimer.start();
     }
 
     @Override
@@ -57,7 +61,7 @@ public class AutoOuttake extends Command{
         }
         System.out.println(usingTimer);
         return (!coralManipulator.hasCoral() && usingTimer && timer.get() > 0.75)|| 
-               (backupTimer && Timer.getFPGATimestamp() - backupTimeOffset > 2);
+               (backupTimer && bTimer.get() > 2);
     }
 
     @Override

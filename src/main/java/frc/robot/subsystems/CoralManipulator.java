@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.sim.SparkAbsoluteEncoderSim;
+import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -9,6 +11,9 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -20,39 +25,39 @@ import frc.robot.Constants.CoralManipulator.CoralManipulatorRollerState;
 
 public class CoralManipulator extends SubsystemBase {
     // pivot 
-    private SparkFlex angleMotor;
+    // private SparkFlex angleMotor;
     private double targetPosition;
 
     //simulation
-    private DCMotor gearbox = DCMotor.getNeoVortex(1);
-    private SingleJointedArmSim armSim = new SingleJointedArmSim(
-        gearbox, 
-        Constants.CoralManipulator.gearRatio, 
-        Constants.CoralManipulator.MOI, 
-        Constants.CoralManipulator.lengthMeters, 
-        Units.degreesToRadians(-80), 
-        Units.degreesToRadians(270), 
-        true, 
-        Units.degreesToRadians(0), 
-        0, 0);
+    // private DCMotor gearbox = DCMotor.getNeoVortex(1);
+    // private SingleJointedArmSim armSim = new SingleJointedArmSim(
+    //     gearbox, 
+    //     Constants.CoralManipulator.gearRatio, 
+    //     Constants.CoralManipulator.MOI, 
+    //     Constants.CoralManipulator.lengthMeters, 
+    //     Units.degreesToRadians(-80), 
+    //     Units.degreesToRadians(270), 
+    //     true, 
+    //     Units.degreesToRadians(0), 
+    //     0, 0);
 
     // private SparkFlexSim motorSim;
     // private SparkAbsoluteEncoderSim encoderSim;
 
     // roller
-    public SparkMax rollerMotor;
+    // public SparkMax rollerMotor;
     public DigitalInput beamBreak;
 
     public CoralManipulator() {
 
         //pivot
-        angleMotor = new SparkFlex(Constants.CoralManipulator.angleMotorID, MotorType.kBrushless);
+        // angleMotor = new SparkFlex(Constants.CoralManipulator.angleMotorID, MotorType.kBrushless);
         // motorSim = new SparkFlexSim(angleMotor, gearbox);
         // encoderSim = motorSim.getAbsoluteEncoderSim();
-        targetPosition = Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE.angle;
+        // targetPosition = Constants.CoralManipulator.CoralManipulatorPivotState.INTAKE.angle;
 
         //roller
-        rollerMotor = new SparkMax(Constants.CoralManipulator.rollerMotorID, MotorType.kBrushless);
+        // rollerMotor = new SparkMax(Constants.CoralManipulator.rollerMotorID, MotorType.kBrushless);
         beamBreak = new DigitalInput(Constants.CoralManipulator.beamBreakDIO);
         setRollerGoalState(CoralManipulatorRollerState.PASSIVE);
     }
@@ -72,7 +77,7 @@ public class CoralManipulator extends SubsystemBase {
                 //otherwise it will use the FF for when the manipulator is empty
                 ff = Constants.CoralManipulator.angleFFEmpty.calculate(getAngle(), Constants.CoralManipulator.anglePID.getSetpoint().velocity);
             }
-            angleMotor.setVoltage(ff + pid);
+            // angleMotor.setVoltage(ff + pid);
         }
         SmartDashboard.putNumber("armsetpoint", Units.radiansToDegrees(targetPosition));
         SmartDashboard.putNumber("armposition", Units.radiansToDegrees(getAngle()));
@@ -83,7 +88,8 @@ public class CoralManipulator extends SubsystemBase {
 
     /** @return radians of manipulator angle */
     public double getAngle(){
-        return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset - Math.PI/3;
+        return 0;
+        // return Units.rotationsToRadians(angleMotor.getAbsoluteEncoder().getPosition()) + Constants.CoralManipulator.FFOffset - Math.PI/3;
     }
 
     public boolean hasCoral(){
@@ -111,13 +117,13 @@ public class CoralManipulator extends SubsystemBase {
     //         BatterySim.calculateDefaultBatteryLoadedVoltage(armSim.getCurrentDrawAmps()));
     // }
 
-    /** will return 0 if not used during simulation 
-     * @return radians
-    */
-    public double getSimPosition(){
-        if(RobotBase.isReal()) return 0;
-        return armSim.getAngleRads() - Math.PI/2;
-    }
+    // /** will return 0 if not used during simulation 
+    //  * @return radians
+    // */
+    // public double getSimPosition(){
+    //     if(RobotBase.isReal()) return 0;
+    //     return armSim.getAngleRads() - Math.PI/2;
+    // }
 
     /** @param desiredState desired final state of coral manipulator pivot */
     public void setPivotGoalState(CoralManipulatorPivotState desiredState){
@@ -127,7 +133,7 @@ public class CoralManipulator extends SubsystemBase {
 
     /** @param desiredState the desired final state of coral manipulator roller */
     public void setRollerGoalState(CoralManipulatorRollerState desiredState){
-        rollerMotor.set(desiredState.spin);
+        // rollerMotor.set(desiredState.spin);
     }
 
     public class ChangePivotState extends Command {
@@ -145,6 +151,7 @@ public class CoralManipulator extends SubsystemBase {
 
         @Override
         public boolean isFinished(){
+            if(RobotBase.isSimulation()) return true;
             return MathUtil.isNear(getAngle(), targetPosition, Constants.CoralManipulator.angleTolerance);
         }
     }

@@ -1,10 +1,17 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,28 +19,29 @@ import frc.robot.Constants;
 import frc.robot.Constants.Elevator.ElevatorState;
 
 public class Elevator extends SubsystemBase{
-    private SparkFlex motor;
+    // private SparkFlex motor;
     private boolean zeroMode;
 
     //sim
-    // private DCMotor elevatorGearbox = DCMotor.getNeoVortex(1);
-    // private ElevatorSim elevatorSim = new ElevatorSim(
-    //     elevatorGearbox, 
-    //     Constants.Elevator.elevatorGearing, 
-    //     Constants.Elevator.elevatorWeightKG, 
-    //     Constants.Elevator.spoolDiameter, 
-    //     0, 
-    //     Constants.Elevator.maxHeight, 
-    //     true, 
-    //     0, 
-    //     0.001,
-    //     0);
+    private DCMotor elevatorGearbox = DCMotor.getNeoVortex(1);
+    private ElevatorSim elevatorSim = new ElevatorSim(
+        elevatorGearbox, 
+        Constants.Elevator.elevatorGearing, 
+        Constants.Elevator.elevatorWeightKG, 
+        Constants.Elevator.spoolDiameter, 
+        0, 
+        Constants.Elevator.maxHeight, 
+        true, 
+        0, 
+        0.001,
+        0);
 
-    //private SparkFlexSim motorSim;
+    private SparkFlexSim motorSim;
 
     public Elevator(){
-        motor = new SparkFlex(Constants.Elevator.elevatorMotorID, MotorType.kBrushless);
-        setGoalState(ElevatorState.INTAKE);
+        // motor = new SparkFlex(Constants.Elevator.elevatorMotorID, MotorType.kBrushless);
+        // motorSim = new SparkFlexSim(motor, elevatorGearbox);
+        // setGoalState(ElevatorState.INTAKE);
     }
 
     /** @param position the desired final state of the elevator */
@@ -45,26 +53,26 @@ public class Elevator extends SubsystemBase{
 
     @Override
     public void periodic(){
-        if(!zeroMode && DriverStation.isEnabled()){
-            double PIDOutput = Constants.Elevator.elevatorPID.calculate(getHeight());
-            double FFOutput = Constants.Elevator.elevatorFF.calculate(Constants.Elevator.elevatorPID.getSetpoint().velocity);
-            motor.setVoltage((PIDOutput + FFOutput));
-            if(motor.getReverseLimitSwitch().isPressed()){
-                motor.getEncoder().setPosition(0);
-            }
-        }
-        else{
-            motor.set(-0.2);
-            if(motor.getReverseLimitSwitch().isPressed()){
-                zeroMode = false;
-                motor.getEncoder().setPosition(0);
-                setGoalState(ElevatorState.INTAKE);
-            }
-        }
-        SmartDashboard.putNumber("encoderPosition", motor.getEncoder().getPosition());
-        SmartDashboard.putNumber("height", getHeight());
-        SmartDashboard.putNumber("percent", motor.getAppliedOutput());
-        SmartDashboard.putBoolean("limit switch", motor.getReverseLimitSwitch().isPressed());
+        // if(!zeroMode && DriverStation.isEnabled()){
+        //     double PIDOutput = Constants.Elevator.elevatorPID.calculate(getHeight());
+        //     double FFOutput = Constants.Elevator.elevatorFF.calculate(Constants.Elevator.elevatorPID.getSetpoint().velocity);
+        //     motor.setVoltage((PIDOutput + FFOutput));
+        //     if(motor.getReverseLimitSwitch().isPressed()){
+        //         motor.getEncoder().setPosition(0);
+        //     }
+        // }
+        // else{
+        //     motor.set(-0.2);
+        //     if(motor.getReverseLimitSwitch().isPressed()){
+        //         zeroMode = false;
+        //         motor.getEncoder().setPosition(0);
+        //         setGoalState(ElevatorState.INTAKE);
+        //     }
+        // }
+        // SmartDashboard.putNumber("encoderPosition", motor.getEncoder().getPosition());
+        // SmartDashboard.putNumber("height", getHeight());
+        // SmartDashboard.putNumber("percent", motor.getAppliedOutput());
+        // SmartDashboard.putBoolean("limit switch", motor.getReverseLimitSwitch().isPressed());
     }
 
     /** toggles zero mode, which lowers elevator at a constant percentage until it hits limit switch and then resets the relative encoder zero to there.*/
@@ -74,7 +82,8 @@ public class Elevator extends SubsystemBase{
 
     /** @return height of elevator in meters */
     public double getHeight(){
-        return motor.getEncoder().getPosition() / Constants.Elevator.rotationsPerMeter;
+        return 0;
+        // return motor.getEncoder().getPosition() / Constants.Elevator.rotationsPerMeter;
     }
 
     // public void simulationPeriodic() {
@@ -124,6 +133,7 @@ public class Elevator extends SubsystemBase{
 
         @Override
         public boolean isFinished(){
+            if(RobotBase.isSimulation()) return true;
             return !continuous && MathUtil.isNear(getHeight(), Constants.Elevator.elevatorPID.getGoal().position, Constants.Elevator.elevatorTolerance);
         }
     }
