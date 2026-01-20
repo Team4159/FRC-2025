@@ -1,26 +1,29 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+// WARNING CODE IS MODIFIED FOR PROTOTYPE TESTING
+// CHANGE SETPOINTS BEFORE RUNNING
+
 public class AlgaeIntake extends SubsystemBase {
-    private SparkFlex roller; //vortex
-    private SparkMax pivot; //neo
+    private TalonFX roller; //x44
+    private SparkFlex pivot; //vortex
     private double targetAngle;
-    private DutyCycleEncoder encoder;
+    private RelativeEncoder encoder;
 
     public AlgaeIntake() {
-        roller = new SparkFlex(Constants.AlgaeIntake.rollerID, MotorType.kBrushless);
-        pivot = new SparkMax(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
+        roller = new TalonFX(Constants.AlgaeIntake.rollerID, "rio");
+        pivot = new SparkFlex(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
         targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle;
-        encoder = new DutyCycleEncoder(0);
+        encoder = pivot.getEncoder();
     }
 
     public void setRollerSpeed(double speed) {
@@ -39,10 +42,10 @@ public class AlgaeIntake extends SubsystemBase {
     @Override
     public void periodic(){
         //double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
-        double currentAngle = encoder.get();
-        if(currentAngle < 0.25){
-            currentAngle = 1;
-        }
+        double currentAngle = encoder.getPosition();
+        // if(currentAngle < 0.25){
+        //     currentAngle = 1;
+        // }
         SmartDashboard.putNumber("AlgaeManip angle", currentAngle);
         pivot.set(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
     }

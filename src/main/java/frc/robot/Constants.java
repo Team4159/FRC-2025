@@ -187,7 +187,7 @@ public class Constants {
     public static final class AlgaeIntake {
         public static final int rollerID = 3, pivotID = 2;
 
-        public static final double kP = 1;
+        public static final double kP = 0.01;
         public static final double kI = 0;
         public static final double kD = 0;
 
