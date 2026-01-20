@@ -42,8 +42,8 @@ public class AlgaeIntake extends SubsystemBase {
     @Override
     public void periodic(){
         //double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
-        double currentAngle = encoder.getPosition();
-        // if(currentAngle < 0.25){
+        double currentAngle = encoder.getPosition() * 2 * Math.PI; 
+        // if(currentAngle < 0.25) {
         //     currentAngle = 1;
         // }
         SmartDashboard.putNumber("AlgaeManip angle", currentAngle);
