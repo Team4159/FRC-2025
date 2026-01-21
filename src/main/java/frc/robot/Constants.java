@@ -190,6 +190,7 @@ public class Constants {
         public static final double kP = 0.01;
         public static final double kI = 0;
         public static final double kD = 0;
+        public static final double pivotRatio = 20;
 
         public static final PIDController pidController = new PIDController(kP, kI, kD){{
             enableContinuousInput(0, 2*Math.PI);

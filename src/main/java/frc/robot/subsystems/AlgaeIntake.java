@@ -35,19 +35,19 @@ public class AlgaeIntake extends SubsystemBase {
     }
     /**@param angle radians*/
     public void setIntakeAngle(double angle) {
-        targetAngle = angle;
+        targetAngle = angle * Constants.AlgaeIntake.pivotRatio;
         Constants.AlgaeIntake.pidController.reset();
     }
 
     @Override
     public void periodic(){
         //double currentAngle = pivot.getAbsoluteEncoder().getPosition() * Math.PI;
-        double currentAngle = encoder.getPosition() * 2 * Math.PI; 
+        double currentAngle = encoder.getPosition(); 
         // if(currentAngle < 0.25) {
         //     currentAngle = 1;
         // }
         SmartDashboard.putNumber("AlgaeManip angle", currentAngle);
-        pivot.set(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
+        pivot.setVoltage(-Constants.AlgaeIntake.pidController.calculate(currentAngle, targetAngle));
     }
 
     public class ChangeState extends Command {
