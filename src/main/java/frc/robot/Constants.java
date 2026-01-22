@@ -199,9 +199,9 @@ public class Constants {
             // STOW(1.85, 0),
             // INTAKE(0.5, 1),
             // OUTTAKE(0.7, -1);
-            STOW(1, 0),
-            INTAKE(0.7, 1),
-            OUTTAKE(0.8, -1);
+            STOW(7, 0),
+            INTAKE(0, 1),
+            OUTTAKE(0, -1);
             
             public final double speed;
             public final double angle;
