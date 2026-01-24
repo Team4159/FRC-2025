@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -24,6 +26,7 @@ public class AlgaeIntake extends SubsystemBase {
         pivot = new SparkFlex(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
         targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.STOW.angle;
         encoder = pivot.getEncoder();
+        roller.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
     }
 
     public void setRollerSpeed(double speed) {
@@ -35,7 +38,7 @@ public class AlgaeIntake extends SubsystemBase {
     }
     /**@param angle radians*/
     public void setIntakeAngle(double angle) {
-        targetAngle = angle * Constants.AlgaeIntake.pivotRatio;
+        targetAngle = angle;
         Constants.AlgaeIntake.pidController.reset();
     }
 

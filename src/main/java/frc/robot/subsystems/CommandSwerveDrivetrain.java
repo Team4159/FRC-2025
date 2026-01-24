@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -416,6 +417,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         closestPoseF2d.setRobotPose(getState().Pose);
         SmartDashboard.putData("closest reef", closestPoseF2d);
         setMaxAccel();
+
+        CANcoder encoder2 = new CANcoder(2, "Drivetrain");
+
+        SmartDashboard.putNumber("encoder 2 position", encoder2.getAbsolutePosition().getValueAsDouble());
     }
 
     /**
