@@ -16,17 +16,16 @@ import frc.robot.Constants;
 // CHANGE SETPOINTS BEFORE RUNNING
 
 public class AlgaeIntake extends SubsystemBase {
-    private TalonFX roller; //x44
+    private SparkFlex roller; //vortex
     private SparkFlex pivot; //vortex
     private double targetAngle;
     private RelativeEncoder encoder;
 
     public AlgaeIntake() {
-        roller = new TalonFX(Constants.AlgaeIntake.rollerID);
+        roller = new SparkFlex(Constants.AlgaeIntake.rollerID, MotorType.kBrushless);
         pivot = new SparkFlex(Constants.AlgaeIntake.pivotID, MotorType.kBrushless);
         targetAngle = Constants.AlgaeIntake.AlgaeIntakeState.INTAKE.angle;
         encoder = pivot.getEncoder();
-        roller.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
     }
 
     public void setRollerSpeed(double speed) {
